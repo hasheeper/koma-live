@@ -1,4 +1,4 @@
-# Koma Rig 离线制作与验收
+# Koma Live 离线制作与验收（Koma Rig CLI / PSD）
 
 在仓库根目录使用 Node 26。TypeScript 内核与 CLI 负责骨架、绑定、姿势求值与清单导出；离线 PNG 像素比对与出图使用 Python、NumPy 和 Pillow 环境（可用 `uv sync --locked --project tools/psd` 安装，或用 `KOMA_RIG_PYTHON` 指向已有解释器）。
 

@@ -7,9 +7,9 @@ description: >-
   check-bend, mountLiveRig, mountPerformance, Koma Live, or inspect:live.
 ---
 
-# Koma Rig 2D 绑骨与实时动画指南
+# Koma Live 2D 绑骨与实时动画指南
 
-面向「精绘分层立绘 + 程序化实时驱动」工作流。先建立画面直觉与项目能力边界，再按需查阅详细工具手册与实战经验库。
+面向 **Koma Live**（内置 **Koma Rig** 绑骨底盘）「精绘分层立绘 + 程序化实时驱动」工作流。先建立画面直觉与项目能力边界，再按需查阅详细工具手册与实战经验库。
 
 ---
 

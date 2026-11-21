@@ -1,7 +1,7 @@
-# Koma Rig 演出契约与 Koma Live 动帧计划
+# Koma Live 演出契约与动帧工坊规划
 
 > **状态**：M1–M4 已落地并通过单元测试与浏览器端到端回归（`npm test`、`npm run test:live`）。  
-> **品牌脉络**：以 **「动帧（Koma）」** 为核心统一整个产品家族——**Koma Image**（静帧）· **Koma Rig**（骨帧底盘）· **Koma Live**（动帧展示与作品工坊）。运行时协议采用与页面形态解耦的中立命名：**`mountPerformance`**、**`koma-rig.performance.v1`** 与 **`koma-rig.work.v1`**。
+> **品牌脉络**：以 **「动帧（Koma）」** 为核心统一整个产品家族——**Koma Image**（静帧）· **Koma Live**（动帧主平台，内置 **Koma Rig** 绑骨底盘）。底层稳定协议保持 `koma-rig.*.v1/v2` 与 `koma-work.json` 向后兼容，运行时入口采用与页面形态解耦的 **`mountPerformance`** 与 **`mountLiveRig`**。
 
 本文定义 Koma Rig 体系的最后一块拼图：**应用承载契约（Performance & Work Contract）** 与 **Koma Live 动帧展示 / 作品工坊**。目标是让任意目录结构下的角色切片与 AI 代码美术演出脚本，都能以 **100% 一致、零坐标系漂移、零硬编码** 的方式同时运行在 **Koma Live** 和 **真实网页 / 游戏作品** 中。[功能规格](implementation-plan.md) · [工作台说明](studio-layout-plan.md) · [AI 演出技能](../.agents/skills/koma-rig-animation/SKILL.md)
 

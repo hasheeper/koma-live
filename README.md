@@ -1,10 +1,10 @@
-# Koma Rig
+# Koma Live
 
-通用分层 2D 绑骨底盘、代码原生软体形变与实时 WebGL 驱动运行时。面向「精绘分层立绘 + 前端程序化代码美术」工作流：通过工作台或离线 CLI 完成 PSD 去噪切图与像素核验、骨架与骨链自动蒙皮、轮廓网格与绘制顺序校准，再通过 `mountPerformance` / `mountLiveRig` 将整套骨架的完整 **TRS（平移 / 旋转 / 缩放）** 与 **M4 代码原生顶点变形口（`deform` Mesh Field）** 暴露给前端或 AI 编写的实时动画与同轴前后景光效代码。[功能规格](docs/implementation-plan.md) · [工作台说明](docs/studio-layout-plan.md) · [演出契约与 Koma Live](docs/performance-contract.md) · [动帧视觉验收](docs/live-inspection-plan.md) · [离线制作与验收](docs/offline-authoring.md) · [维护交接](docs/maintenance-handoff.md) · [编辑器参考](docs/editor-references.md) · [AI 演出技能](.agents/skills/koma-rig-animation/SKILL.md)
+通用分层 2D 活立绘创作与实时 WebGL 驱动平台（内置 **Koma Rig** 绑骨底盘与代码原生软体形变）。面向「精绘分层立绘 + 前端程序化代码美术」工作流：通过工作台或离线 CLI 完成 PSD 去噪切图与像素核验、骨架与骨链自动蒙皮、轮廓网格与绘制顺序校准，再通过 `mountPerformance` / `mountLiveRig` 将整套骨架的完整 **TRS（平移 / 旋转 / 缩放）** 与 **M4 代码原生顶点变形口（`deform` Mesh Field）** 暴露给前端或 AI 编写的实时动画与同轴前后景光效代码。[功能规格](docs/implementation-plan.md) · [工作台说明](docs/studio-layout-plan.md) · [演出契约](docs/performance-contract.md) · [动帧视觉验收](docs/live-inspection-plan.md) · [离线制作与验收](docs/offline-authoring.md) · [维护交接](docs/maintenance-handoff.md) · [编辑器参考](docs/editor-references.md) · [AI 演出技能](.agents/skills/koma-rig-animation/SKILL.md)
 
 ## 打开工作台
 
-用 Node.js 26 在仓库根目录运行 `npm ci`，再运行 `npm run dev -- --host 127.0.0.1 --port 5186`。打开 [Koma Rig 本地工作台](http://127.0.0.1:5186/)。
+用 Node.js 26 在仓库根目录运行 `npm ci`，再运行 `npm run dev -- --host 127.0.0.1 --port 5186`。打开 [Koma Live 本地工作台](http://127.0.0.1:5186/)（顶栏一键切换「绑骨 Koma Rig ↔ 动帧 Koma Live」）。
 
 - **搭建模式**：左侧层级树管理图层显隐/锁定与绘制顺序拖拽，中央画布建骨（按住 `Alt` 可建偏移子骨）与拖动调整，右侧检查器支持骨名原地重命名、拾取改父骨/设为根骨、删骨、单骨与连续骨链绑定及关节柔化、骨链一键安全轮廓网格与轮廓网格手绘/自动描绘/清除。
 - **试动模式**：画布拖拽旋转骨骼，右侧检查器实时试调骨骼完整 **TRS（旋转 / 平移 X·Y / 缩放 X·Y）**，网格翻面或自交会在画布直接标红高亮。

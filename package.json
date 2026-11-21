@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "通用分层 2D Rig 工具",
+  "description": "Koma Live · 分层 2D 活立绘创作与实时 WebGL 驱动平台（内置 Koma Rig 绑骨底盘）",
   "engines": {
     "node": "26.x"
   },

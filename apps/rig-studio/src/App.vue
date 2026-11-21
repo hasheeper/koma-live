@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { GeometryError, createRig, editRig, exportRigSpec, previewRig, meshFromAlpha, meshFromContour, suggestAlphaThreshold, splitMeshEdge, removeMeshVertex, retessellateOutline, restMesh, type AttachmentMesh, type BoneTransform, type BoneTransforms, type TraceOptions, type Pose, type Point, type RigEdit } from '@koma-rig/rig-core'
 import { devWorkspaceProject, directory, mountedDirectory, projectFromSource, example, type Project, type MeshDraft, type Mode, type Tool, type Selection } from './project'
 import { DEV_WORKSPACE_ENABLED, extractDroppedPayload, listDevWorks, rememberOpenedSource, type DevWorkSummary } from './local-session'
@@ -19,6 +19,13 @@ const initialParams = new URLSearchParams(window.location.search)
 const initialView = initialParams.get('view') === 'live' ? 'live' : 'studio'
 const initialUrlWork = DEV_WORKSPACE_ENABLED ? initialParams.get('work')?.trim() || undefined : undefined
 const workspace = ref<'studio' | 'live'>(initialView)
+watch(
+  workspace,
+  (next) => {
+    document.title = next === 'live' ? 'Koma Live' : 'Koma Live · Rig'
+  },
+  { immediate: true },
+)
 const initialLiveDevWork = ref<string | undefined>(initialUrlWork)
 const initialLiveFsEntry = shallowRef<RecentDirEntry | null>(null)
 const liveBootReady = ref(initialView !== 'live' || Boolean(initialUrlWork) || !readLastSession())

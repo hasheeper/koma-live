@@ -1,4 +1,4 @@
-# Koma Rig 维护交接 · 2026-11-21
+# Koma Live 维护交接 · 2026-11-21
 
 当前主线是离线切片与像素复验 → Studio 搭骨、绑层并校准轮廓网格 → 导出 `rig-spec.json` → 用单文件演出脚本驱动 Koma Live 或游戏宿主 → 用 `inspect:live` 抓帧验收。现行功能规格 §3、§5.2 仍承诺可选 FFD / Ribbon 和静态动作发布。下列清理项按当前工作区的调用关系整理。[功能规格](implementation-plan.md) · [演出契约](performance-contract.md)
 
