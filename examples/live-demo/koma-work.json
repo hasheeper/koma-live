@@ -1,0 +1,14 @@
+{
+  "format": "koma-rig.work.v1",
+  "id": "chain-strip-live",
+  "title": "整张纸带 · 骨链动帧",
+  "rig": "./slices/",
+  "performance": "./motion/chain-live.js",
+  "poster": "./slices/reference.png",
+  "viewport": {
+    "fit": "contain",
+    "anchor": [0.5, 0.5],
+    "paddingPx": 16
+  },
+  "defaultState": "breeze"
+}

@@ -1,0 +1,56 @@
+{
+  "rigId": "paper",
+  "rigVersion": 1,
+  "semantics": {
+    "parameters": [
+      {
+        "id": "tiltX",
+        "meaning": "正值向右倾斜",
+        "unit": "°",
+        "min": -10,
+        "max": 10,
+        "default": 0
+      },
+      {
+        "id": "tiltY",
+        "meaning": "正值向上倾斜",
+        "unit": "°",
+        "min": -6,
+        "max": 6,
+        "default": 0
+      }
+    ],
+    "ellipses": [
+      {
+        "x": "tiltX",
+        "y": "tiltY",
+        "a": 10,
+        "b": 6
+      }
+    ],
+    "slots": []
+  },
+  "bindings": [
+    {
+      "layerId": "psd-2",
+      "pivot": [
+        100,
+        80
+      ],
+      "drives": [
+        {
+          "parameter": "tiltX",
+          "degrees": 1
+        }
+      ]
+    },
+    {
+      "layerId": "psd-4",
+      "parentId": "psd-2",
+      "pivot": [
+        125,
+        80
+      ]
+    }
+  ]
+}

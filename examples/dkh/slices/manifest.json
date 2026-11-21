@@ -1,0 +1,831 @@
+{
+  "format": "koma-rig.slices.v2",
+  "sourceId": "dkh",
+  "canvas": {
+    "width": 1600,
+    "height": 1600
+  },
+  "reference": "reference.png",
+  "layers": [
+    {
+      "layerId": "psd-42",
+      "name": "ribbons_l_down",
+      "groups": [],
+      "texture": "textures/0.png",
+      "sourceIndex": 0,
+      "rect": [
+        603,
+        198,
+        94,
+        155
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-133",
+      "name": "twintail_l",
+      "groups": [
+        "back_hair"
+      ],
+      "texture": "textures/1.png",
+      "sourceIndex": 0,
+      "rect": [
+        415,
+        188,
+        304,
+        543
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-119"
+    },
+    {
+      "layerId": "psd-40",
+      "name": "back_main",
+      "groups": [
+        "back_hair"
+      ],
+      "texture": "textures/2.png",
+      "sourceIndex": 1,
+      "rect": [
+        684,
+        83,
+        267,
+        306
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-119"
+    },
+    {
+      "layerId": "psd-118",
+      "name": "twintail_r",
+      "groups": [
+        "back_hair"
+      ],
+      "texture": "textures/3.png",
+      "sourceIndex": 2,
+      "rect": [
+        931,
+        166,
+        246,
+        585
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-119"
+    },
+    {
+      "layerId": "psd-62",
+      "name": "topwear2",
+      "groups": [],
+      "texture": "textures/4.png",
+      "sourceIndex": 2,
+      "rect": [
+        693,
+        372,
+        71,
+        134
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-130",
+      "name": "belts1",
+      "groups": [],
+      "texture": "textures/5.png",
+      "sourceIndex": 3,
+      "rect": [
+        558,
+        816,
+        37,
+        250
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-142",
+      "name": "outfit_i",
+      "groups": [],
+      "texture": "textures/6.png",
+      "sourceIndex": 4,
+      "rect": [
+        512,
+        473,
+        522,
+        453
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-87",
+      "name": "outfit_o_l",
+      "groups": [],
+      "texture": "textures/7.png",
+      "sourceIndex": 5,
+      "rect": [
+        433,
+        389,
+        283,
+        484
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-79",
+      "name": "skirt_i",
+      "groups": [],
+      "texture": "textures/8.png",
+      "sourceIndex": 6,
+      "rect": [
+        547,
+        673,
+        366,
+        220
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-121",
+      "name": "leg_l",
+      "groups": [],
+      "texture": "textures/9.png",
+      "sourceIndex": 7,
+      "rect": [
+        631,
+        716,
+        153,
+        673
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-82",
+      "name": "leg_r",
+      "groups": [],
+      "texture": "textures/10.png",
+      "sourceIndex": 8,
+      "rect": [
+        717,
+        750,
+        174,
+        572
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-83",
+      "name": "foot-r",
+      "groups": [],
+      "texture": "textures/11.png",
+      "sourceIndex": 9,
+      "rect": [
+        791,
+        1255,
+        137,
+        251
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-123",
+      "name": "foot_l",
+      "groups": [],
+      "texture": "textures/12.png",
+      "sourceIndex": 10,
+      "rect": [
+        717,
+        1351,
+        123,
+        239
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-137",
+      "name": "topwear1",
+      "groups": [],
+      "texture": "textures/13.png",
+      "sourceIndex": 11,
+      "rect": [
+        695,
+        358,
+        244,
+        272
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-136",
+      "name": "arm_r1",
+      "groups": [],
+      "texture": "textures/14.png",
+      "sourceIndex": 12,
+      "rect": [
+        856,
+        388,
+        106,
+        221
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-78",
+      "name": "skirt_o",
+      "groups": [],
+      "texture": "textures/15.png",
+      "sourceIndex": 13,
+      "rect": [
+        559,
+        588,
+        357,
+        299
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-65",
+      "name": "outfit_o_r2",
+      "groups": [],
+      "texture": "textures/16.png",
+      "sourceIndex": 14,
+      "rect": [
+        832,
+        559,
+        272,
+        433
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-124",
+      "name": "hand_r",
+      "groups": [],
+      "texture": "textures/17.png",
+      "sourceIndex": 15,
+      "rect": [
+        978,
+        860,
+        127,
+        128
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-71",
+      "name": "arm_r2",
+      "groups": [],
+      "texture": "textures/18.png",
+      "sourceIndex": 16,
+      "rect": [
+        896,
+        553,
+        192,
+        346
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-149",
+      "name": "bow3",
+      "groups": [
+        "bow"
+      ],
+      "texture": "textures/19.png",
+      "sourceIndex": 0,
+      "rect": [
+        988,
+        646,
+        53,
+        93
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-151"
+    },
+    {
+      "layerId": "psd-148",
+      "name": "bow2",
+      "groups": [
+        "bow"
+      ],
+      "texture": "textures/20.png",
+      "sourceIndex": 1,
+      "rect": [
+        966,
+        645,
+        66,
+        54
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-151"
+    },
+    {
+      "layerId": "psd-125",
+      "name": "bow1",
+      "groups": [
+        "bow"
+      ],
+      "texture": "textures/21.png",
+      "sourceIndex": 2,
+      "rect": [
+        958,
+        601,
+        83,
+        71
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-151"
+    },
+    {
+      "layerId": "psd-72",
+      "name": "outfit_o_r1",
+      "groups": [],
+      "texture": "textures/22.png",
+      "sourceIndex": 18,
+      "rect": [
+        835,
+        473,
+        226,
+        230
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-48",
+      "name": "neck",
+      "groups": [],
+      "texture": "textures/23.png",
+      "sourceIndex": 19,
+      "rect": [
+        794,
+        290,
+        79,
+        92
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-51",
+      "name": "neckwear",
+      "groups": [],
+      "texture": "textures/24.png",
+      "sourceIndex": 20,
+      "rect": [
+        809,
+        353,
+        62,
+        30
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-116",
+      "name": "ribbons_l_up2",
+      "groups": [],
+      "texture": "textures/25.png",
+      "sourceIndex": 21,
+      "rect": [
+        625,
+        110,
+        64,
+        93
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-145",
+      "name": "ribbons_l_up1",
+      "groups": [],
+      "texture": "textures/26.png",
+      "sourceIndex": 22,
+      "rect": [
+        557,
+        175,
+        141,
+        47
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-114",
+      "name": "ribbons_r_down2",
+      "groups": [
+        "ribbons_r"
+      ],
+      "texture": "textures/27.png",
+      "sourceIndex": 0,
+      "rect": [
+        935,
+        213,
+        41,
+        158
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-146"
+    },
+    {
+      "layerId": "psd-144",
+      "name": "ribbons_r_down1",
+      "groups": [
+        "ribbons_r"
+      ],
+      "texture": "textures/28.png",
+      "sourceIndex": 1,
+      "rect": [
+        931,
+        169,
+        52,
+        85
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-146"
+    },
+    {
+      "layerId": "psd-115",
+      "name": "ribbons_r_up2",
+      "groups": [
+        "ribbons_r"
+      ],
+      "texture": "textures/29.png",
+      "sourceIndex": 2,
+      "rect": [
+        933,
+        53,
+        26,
+        118
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-146"
+    },
+    {
+      "layerId": "psd-143",
+      "name": "ribbons_r_up1",
+      "groups": [
+        "ribbons_r"
+      ],
+      "texture": "textures/30.png",
+      "sourceIndex": 3,
+      "rect": [
+        935,
+        60,
+        94,
+        121
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-146"
+    },
+    {
+      "layerId": "psd-34",
+      "name": "face1",
+      "groups": [],
+      "texture": "textures/31.png",
+      "sourceIndex": 24,
+      "rect": [
+        701,
+        131,
+        198,
+        227
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-134",
+      "name": "face2",
+      "groups": [],
+      "texture": "textures/32.png",
+      "sourceIndex": 25,
+      "rect": [
+        700,
+        121,
+        200,
+        158
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-153",
+      "name": "hand-l3",
+      "groups": [],
+      "texture": "textures/33.png",
+      "sourceIndex": 26,
+      "rect": [
+        699,
+        328,
+        62,
+        18
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-7",
+      "name": "mask",
+      "groups": [],
+      "texture": "textures/34.png",
+      "sourceIndex": 27,
+      "rect": [
+        744,
+        234,
+        142,
+        123
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-155",
+      "name": "hair_front4",
+      "groups": [
+        "hair_front"
+      ],
+      "texture": "textures/35.png",
+      "sourceIndex": 0,
+      "rect": [
+        661,
+        110,
+        167,
+        333
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-112"
+    },
+    {
+      "layerId": "psd-111",
+      "name": "hair_front3",
+      "groups": [
+        "hair_front"
+      ],
+      "texture": "textures/36.png",
+      "sourceIndex": 1,
+      "rect": [
+        704,
+        127,
+        48,
+        164
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-112"
+    },
+    {
+      "layerId": "psd-110",
+      "name": "hair_front1",
+      "groups": [
+        "hair_front"
+      ],
+      "texture": "textures/37.png",
+      "sourceIndex": 2,
+      "rect": [
+        737,
+        91,
+        144,
+        203
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-112"
+    },
+    {
+      "layerId": "psd-109",
+      "name": "hair_front2",
+      "groups": [
+        "hair_front"
+      ],
+      "texture": "textures/38.png",
+      "sourceIndex": 3,
+      "rect": [
+        821,
+        92,
+        111,
+        355
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-112"
+    },
+    {
+      "layerId": "psd-131",
+      "name": "hand-l2",
+      "groups": [],
+      "texture": "textures/39.png",
+      "sourceIndex": 29,
+      "rect": [
+        646,
+        373,
+        60,
+        112
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-127",
+      "name": "hand-l1",
+      "groups": [],
+      "texture": "textures/40.png",
+      "sourceIndex": 30,
+      "rect": [
+        639,
+        327,
+        120,
+        121
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-55",
+      "name": "arm-l",
+      "groups": [],
+      "texture": "textures/41.png",
+      "sourceIndex": 31,
+      "rect": [
+        524,
+        373,
+        179,
+        219
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-128",
+      "name": "ring",
+      "groups": [],
+      "texture": "textures/42.png",
+      "sourceIndex": 32,
+      "rect": [
+        665,
+        368,
+        36,
+        79
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-96",
+      "name": "eye_white",
+      "groups": [
+        "eye"
+      ],
+      "texture": "textures/43.png",
+      "sourceIndex": 0,
+      "rect": [
+        730,
+        270,
+        54,
+        32
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-106"
+    },
+    {
+      "layerId": "psd-93",
+      "name": "irides",
+      "groups": [
+        "eye"
+      ],
+      "texture": "textures/44.png",
+      "sourceIndex": 1,
+      "rect": [
+        750,
+        267,
+        32,
+        35
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-106"
+    },
+    {
+      "layerId": "psd-102",
+      "name": "eyelid_lower",
+      "groups": [
+        "eye"
+      ],
+      "texture": "textures/45.png",
+      "sourceIndex": 2,
+      "rect": [
+        742,
+        287,
+        43,
+        23
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-106"
+    },
+    {
+      "layerId": "psd-105",
+      "name": "eyelash",
+      "groups": [
+        "eye"
+      ],
+      "texture": "textures/46.png",
+      "sourceIndex": 3,
+      "rect": [
+        725,
+        259,
+        60,
+        41
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-106"
+    },
+    {
+      "layerId": "psd-91",
+      "name": "eyebrow",
+      "groups": [
+        "eye"
+      ],
+      "texture": "textures/47.png",
+      "sourceIndex": 4,
+      "rect": [
+        739,
+        235,
+        28,
+        17
+      ],
+      "visible": true,
+      "opacity": 1.0,
+      "groupId": "psd-106"
+    }
+  ],
+  "groupTree": [
+    {
+      "groupId": "psd-119",
+      "parentGroupId": null,
+      "name": "back_hair",
+      "visible": true,
+      "index": 1,
+      "idSource": "native"
+    },
+    {
+      "groupId": "psd-151",
+      "parentGroupId": null,
+      "name": "bow",
+      "visible": true,
+      "index": 17,
+      "idSource": "native"
+    },
+    {
+      "groupId": "psd-146",
+      "parentGroupId": null,
+      "name": "ribbons_r",
+      "visible": true,
+      "index": 23,
+      "idSource": "native"
+    },
+    {
+      "groupId": "psd-112",
+      "parentGroupId": null,
+      "name": "hair_front",
+      "visible": true,
+      "index": 28,
+      "idSource": "native"
+    },
+    {
+      "groupId": "psd-106",
+      "parentGroupId": null,
+      "name": "eye",
+      "visible": true,
+      "index": 33,
+      "idSource": "native"
+    }
+  ],
+  "blendSpace": "srgb"
+}

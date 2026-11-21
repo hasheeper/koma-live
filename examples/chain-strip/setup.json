@@ -1,0 +1,57 @@
+[
+  {
+    "op": "add-bone",
+    "boneId": "base",
+    "name": "前段",
+    "start": [
+      16,
+      64
+    ],
+    "end": [
+      72,
+      64
+    ]
+  },
+  {
+    "op": "add-bone",
+    "boneId": "tip",
+    "name": "后段",
+    "parentBoneId": "base",
+    "end": [
+      128,
+      64
+    ]
+  },
+  {
+    "op": "set-parameter",
+    "parameter": {
+      "id": "bend",
+      "meaning": "正值使后段顺时针弯折",
+      "unit": "°",
+      "min": -15,
+      "max": 15,
+      "default": 0
+    }
+  },
+  {
+    "op": "edit-bone",
+    "boneId": "tip",
+    "changes": {
+      "drives": [
+        {
+          "parameter": "bend",
+          "degrees": 1
+        }
+      ]
+    }
+  },
+  {
+    "op": "bind-chain",
+    "layerId": "strip",
+    "boneChain": [
+      "base",
+      "tip"
+    ],
+    "jointSoftnessPx": 16
+  }
+]

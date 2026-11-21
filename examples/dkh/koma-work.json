@@ -1,0 +1,14 @@
+{
+  "format": "koma-rig.work.v1",
+  "id": "dkh-live",
+  "title": "DKH · 活立绘待机",
+  "rig": "./slices/",
+  "performance": "./motion/dkh-live.js",
+  "poster": "./slices/reference.png",
+  "viewport": {
+    "fit": "contain",
+    "anchor": [0.5, 1.0],
+    "paddingPx": 16
+  },
+  "defaultState": "idle"
+}

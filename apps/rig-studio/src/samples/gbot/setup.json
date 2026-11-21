@@ -1,0 +1,281 @@
+[
+  {
+    "op": "add-bone",
+    "boneId": "hip",
+    "name": "骨盆",
+    "start": [
+      285,
+      654
+    ],
+    "end": [
+      285,
+      615
+    ],
+    "snap": false
+  },
+  {
+    "op": "add-bone",
+    "boneId": "body",
+    "name": "躯干",
+    "start": [
+      285,
+      615
+    ],
+    "end": [
+      286,
+      422
+    ],
+    "snap": false,
+    "parentBoneId": "hip"
+  },
+  {
+    "op": "add-bone",
+    "boneId": "head",
+    "name": "头部",
+    "start": [
+      286,
+      405
+    ],
+    "end": [
+      294,
+      141
+    ],
+    "snap": false,
+    "parentBoneId": "body"
+  },
+  {
+    "op": "add-bone",
+    "boneId": "jaw",
+    "name": "下颌",
+    "start": [
+      211,
+      315
+    ],
+    "end": [
+      375,
+      352
+    ],
+    "snap": false,
+    "parentBoneId": "head"
+  },
+  {
+    "op": "add-bone",
+    "boneId": "arm_r",
+    "name": "右上臂",
+    "start": [
+      183,
+      468
+    ],
+    "end": [
+      180,
+      574
+    ],
+    "snap": false,
+    "parentBoneId": "body"
+  },
+  {
+    "op": "add-bone",
+    "boneId": "forearm_r",
+    "name": "右前臂",
+    "start": [
+      180,
+      574
+    ],
+    "end": [
+      198,
+      712
+    ],
+    "snap": false,
+    "parentBoneId": "arm_r"
+  },
+  {
+    "op": "add-bone",
+    "boneId": "arm_l",
+    "name": "左上臂",
+    "start": [
+      363,
+      469
+    ],
+    "end": [
+      364,
+      570
+    ],
+    "snap": false,
+    "parentBoneId": "body"
+  },
+  {
+    "op": "add-bone",
+    "boneId": "forearm_l",
+    "name": "左前臂",
+    "start": [
+      364,
+      570
+    ],
+    "end": [
+      398,
+      695
+    ],
+    "snap": false,
+    "parentBoneId": "arm_l"
+  },
+  {
+    "op": "add-bone",
+    "boneId": "leg_r",
+    "name": "右大腿",
+    "start": [
+      238,
+      666
+    ],
+    "end": [
+      215,
+      765
+    ],
+    "snap": false,
+    "parentBoneId": "hip"
+  },
+  {
+    "op": "add-bone",
+    "boneId": "shin_r",
+    "name": "右小腿",
+    "start": [
+      215,
+      765
+    ],
+    "end": [
+      207,
+      867
+    ],
+    "snap": false,
+    "parentBoneId": "leg_r"
+  },
+  {
+    "op": "add-bone",
+    "boneId": "foot_r",
+    "name": "右脚",
+    "start": [
+      207,
+      867
+    ],
+    "end": [
+      305,
+      895
+    ],
+    "snap": false,
+    "parentBoneId": "shin_r"
+  },
+  {
+    "op": "add-bone",
+    "boneId": "leg_l",
+    "name": "左大腿",
+    "start": [
+      336,
+      658
+    ],
+    "end": [
+      316,
+      758
+    ],
+    "snap": false,
+    "parentBoneId": "hip"
+  },
+  {
+    "op": "add-bone",
+    "boneId": "shin_l",
+    "name": "左小腿",
+    "start": [
+      316,
+      758
+    ],
+    "end": [
+      307,
+      853
+    ],
+    "snap": false,
+    "parentBoneId": "leg_l"
+  },
+  {
+    "op": "add-bone",
+    "boneId": "foot_l",
+    "name": "左脚",
+    "start": [
+      307,
+      853
+    ],
+    "end": [
+      408,
+      882
+    ],
+    "snap": false,
+    "parentBoneId": "shin_l"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-leg_l",
+    "boneId": "leg_l"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-shin_l",
+    "boneId": "shin_l"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-foot_l",
+    "boneId": "foot_l"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-arm_l",
+    "boneId": "arm_l"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-forearm_l",
+    "boneId": "forearm_l"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-leg_r",
+    "boneId": "leg_r"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-shin_r",
+    "boneId": "shin_r"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-foot_r",
+    "boneId": "foot_r"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-hip",
+    "boneId": "hip"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-body",
+    "boneId": "body"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-arm_r",
+    "boneId": "arm_r"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-forearm_r",
+    "boneId": "forearm_r"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-head",
+    "boneId": "head"
+  },
+  {
+    "op": "bind",
+    "layerId": "tex-jaw",
+    "boneId": "jaw"
+  }
+]

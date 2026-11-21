@@ -1,0 +1,68 @@
+{
+  "format": "koma-rig.slices.v2",
+  "sourceId": "paper",
+  "canvas": {
+    "width": 256,
+    "height": 160
+  },
+  "reference": "reference.png",
+  "layers": [
+    {
+      "layerId": "psd-1",
+      "name": "底纸",
+      "groups": [],
+      "texture": "textures/0.png",
+      "rect": [
+        10,
+        10,
+        235,
+        138
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-2",
+      "name": "折翼",
+      "groups": [],
+      "texture": "textures/1.png",
+      "rect": [
+        55,
+        36,
+        154,
+        76
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-3",
+      "name": "半透明压条",
+      "groups": [],
+      "texture": "textures/2.png",
+      "rect": [
+        89,
+        72,
+        48,
+        17
+      ],
+      "visible": true,
+      "opacity": 1.0
+    },
+    {
+      "layerId": "psd-4",
+      "name": "随动标记",
+      "groups": [],
+      "texture": "textures/3.png",
+      "rect": [
+        121,
+        76,
+        9,
+        9
+      ],
+      "visible": true,
+      "opacity": 1.0
+    }
+  ],
+  "blendSpace": "srgb"
+}

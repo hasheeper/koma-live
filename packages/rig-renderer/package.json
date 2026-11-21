@@ -1,0 +1,17 @@
+{
+  "name": "@koma-rig/rig-renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@koma-rig/rig-core": "0.1.0",
+    "pixi.js": "^8.23.0"
+  }
+}

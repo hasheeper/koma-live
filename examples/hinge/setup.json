@@ -1,0 +1,56 @@
+[
+  {
+    "op": "add-bone",
+    "boneId": "base-joint",
+    "start": [
+      20,
+      40
+    ],
+    "end": [
+      76,
+      40
+    ]
+  },
+  {
+    "op": "add-bone",
+    "boneId": "tip-joint",
+    "parentBoneId": "base-joint",
+    "end": [
+      132,
+      40
+    ]
+  },
+  {
+    "op": "bind",
+    "layerId": "base",
+    "boneId": "base-joint"
+  },
+  {
+    "op": "bind",
+    "layerId": "tip",
+    "boneId": "tip-joint"
+  },
+  {
+    "op": "set-parameter",
+    "parameter": {
+      "id": "turn",
+      "meaning": "正值使后段顺时针转动",
+      "unit": "°",
+      "min": -15,
+      "max": 15,
+      "default": 0
+    }
+  },
+  {
+    "op": "edit-bone",
+    "boneId": "tip-joint",
+    "changes": {
+      "drives": [
+        {
+          "parameter": "turn",
+          "degrees": 1
+        }
+      ]
+    }
+  }
+]

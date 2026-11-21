@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <radialGradient id="plate" cx="28%" cy="18%" r="109%">
+      <stop stop-color="#172554"/>
+      <stop offset=".72" stop-color="#151921"/>
+    </radialGradient>
+    <symbol id="koma-tiles" viewBox="0 0 24 24">
+      <rect x="3" y="3" width="3" height="3" rx="1.1" style="opacity:var(--mark-faint,.24)" />
+      <rect x="9.8" y="2.3" width="4.4" height="4.4" rx="1.1" style="opacity:var(--mark-mid,.5)" />
+      <rect x="16.5" y="1.5" width="6" height="6" rx="1.7" />
+      <rect x="2.3" y="9.8" width="4.4" height="4.4" rx="1.1" style="opacity:var(--mark-mid,.5)" />
+      <rect x="9" y="9" width="6" height="6" rx="1.7" />
+      <rect x="17.3" y="9.8" width="4.4" height="4.4" rx="1.1" style="opacity:var(--mark-mid,.5)" />
+      <rect x="1.5" y="16.5" width="6" height="6" rx="1.7" />
+      <rect x="9.8" y="17.3" width="4.4" height="4.4" rx="1.1" style="opacity:var(--mark-mid,.5)" />
+      <rect x="18" y="18" width="3" height="3" rx="1.1" style="opacity:var(--mark-faint,.24)" />
+    </symbol>
+  </defs>
+  <rect width="32" height="32" rx="8.6" fill="url(#plate)"/>
+  <rect x=".5" y=".5" width="31" height="31" rx="8.1" fill="none" stroke="#7dd3fc" stroke-opacity=".2"/>
+  <use href="#koma-tiles" x="4.16" y="4.16" width="23.68" height="23.68" fill="#7dd3fc"/>
+</svg>

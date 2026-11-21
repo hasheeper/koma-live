@@ -1,0 +1,33 @@
+{
+  "name": "@koma-rig/workspace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "通用分层 2D Rig 工具",
+  "engines": {
+    "node": "26.x"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @koma-rig/rig-studio --",
+    "typecheck": "tsc -b packages/rig-core packages/rig-renderer && npm run typecheck -w @koma-rig/rig-studio",
+    "build": "npm run typecheck && npm run build:runtime && npm run build:studio",
+    "build:studio": "tsc -b packages/rig-core packages/rig-renderer && npm run build -w @koma-rig/rig-studio",
+    "build:runtime": "vite build --config packages/rig-renderer/vite.runtime.config.mjs",
+    "test": "vitest run",
+    "test:studio-layout": "npm run build:studio && node --test tests/studio-layout.browser.mjs",
+    "test:live": "npm run build:runtime && npm run build:studio && node --test tests/koma-live.browser.mjs",
+    "inspect:live": "node apps/rig-cli/inspect-live.mjs",
+    "rig": "tsc -b packages/rig-core && node apps/rig-cli/rig.mjs",
+    "test:offline": "npm run typecheck && node --test tests/offline.integration.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "1.62.1",
+    "typescript": "~5.9.3",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1"
+  }
+}

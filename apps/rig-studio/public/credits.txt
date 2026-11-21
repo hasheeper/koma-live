@@ -1,0 +1,7 @@
+Koma Rig uses Koma Image family fonts and toolbar icons. Font license notices are included in fonts/.
+
+GBot character artwork by Andreas Esau. The cutout images are from the Godot documentation project starters by Juan Linietsky, Ariel Manzur and the Godot community, used under CC BY 3.0. Koma Rig supplies its own layer placement, padded canvas, bone hierarchy, bindings and Chinese labels.
+The GBot reference PNG was exported independently with Pillow from the original cutouts and Koma's original rest layout, centered on a 625 × 995 transparent canvas (140 px left, 70 px top).
+https://github.com/godotengine/godot-docs-project-starters/tree/master/cutout_animation_assets
+https://github.com/godotengine/godot-demo-projects/tree/master/2d/skeleton
+https://creativecommons.org/licenses/by/3.0/

@@ -1,0 +1,40 @@
+{
+  "format": "koma-rig.slices.v2",
+  "sourceId": "hinge",
+  "canvas": {
+    "width": 152,
+    "height": 80
+  },
+  "reference": "reference.png",
+  "blendSpace": "srgb",
+  "layers": [
+    {
+      "layerId": "base",
+      "name": "前段",
+      "groups": [],
+      "texture": "textures/base.png",
+      "rect": [
+        20,
+        24,
+        73,
+        32
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tip",
+      "name": "后段",
+      "groups": [],
+      "texture": "textures/tip.png",
+      "rect": [
+        60,
+        24,
+        72,
+        32
+      ],
+      "visible": true,
+      "opacity": 1
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.venv/
+.tools/
+__pycache__/
+.DS_Store
+.tmp/
+.rig-draft.json
+.rig-write.sqlite*

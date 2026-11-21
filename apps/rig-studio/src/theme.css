@@ -1,0 +1,95 @@
+:root, .studio {
+  --canvas-bg: #17181B;
+  --grid-major: #202227;
+  --grid-minor: #1B1C20;
+  --artboard-tick: rgba(255, 255, 255, 0.15);
+
+  --sunken: #131417;
+  --panel: rgba(29, 31, 36, 0.92);
+  --raised: #2A2D34;
+  --hover: rgba(255, 255, 255, 0.05);
+  --row-active: #262930;
+  --row-selected: rgba(61, 242, 255, 0.10);
+  --panel-border: rgba(255, 255, 255, 0.07);
+  --panel-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
+  --toolbar-shadow: 0 6px 20px rgba(0, 0, 0, 0.24);
+
+  --fg-primary: #E3E5EA;
+  --fg-tree: #C4C8D0;
+  --fg-secondary: #9297A3;
+  --fg-muted: #5F6470;
+  --accent: #7CC4FA;
+  --accent-focus: rgba(124, 196, 250, 0.42);
+  --rig-joint: #7CC4FA;
+  --rig-bone: #58A6FF;
+  --rig-selected: #3DF2FF;
+
+  --raised-shadow: none;
+  --mark-mid: .5;
+  --mark-faint: .24;
+  --mesh-candidate: #65eca9;
+  --mesh-delete: #ff858b;
+  --mesh-delete-ink: #38151b;
+  --tree-slot: #D5D9E2;
+  --tree-bone: #E2E6EE;
+  --tree-image: #7FB8E8;
+  --tree-image-fill: rgba(127, 184, 232, 0.22);
+  --tree-mesh-node: #3DF2FF;
+  --tree-mesh-edge: #2EC6D4;
+  --tree-mesh-wire: #E8964A;
+  --tree-gutter-line: rgba(255, 255, 255, 0.05);
+  --tree-header-bg: rgba(255, 255, 255, 0.02);
+  --tree-dot: rgba(227, 229, 234, 0.42);
+  --tree-dot-hover: #E3E5EA;
+  --warn: #edbb70;
+  --r1: 6px;
+  --r2: 8px;
+  --t1: 120ms;
+}
+
+.studio[data-theme="light"] {
+  color-scheme: light;
+  --canvas-bg: #E2E4E8;
+  --grid-major: #D5D8DE;
+  --grid-minor: #DBDDE2;
+  --artboard-tick: rgba(15, 23, 42, 0.18);
+
+  --sunken: #EBEDF2;
+  --panel: rgba(247, 248, 250, 0.94);
+  --raised: #FFFFFF;
+  --hover: rgba(15, 23, 42, 0.04);
+  --row-active: #EAECEF;
+  --row-selected: rgba(8, 145, 178, 0.10);
+  --panel-border: rgba(15, 23, 42, 0.08);
+  --panel-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --toolbar-shadow: var(--panel-shadow);
+
+  --fg-primary: #1E2128;
+  --fg-tree: #353A44;
+  --fg-secondary: #5C6270;
+  --fg-muted: #8C92A0;
+  --accent: #0284C7;
+  --accent-focus: rgba(2, 132, 199, 0.35);
+  --rig-joint: #0284C7;
+  --rig-bone: #0369A1;
+  --rig-selected: #0891B2;
+
+  --raised-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --mark-mid: .62;
+  --mark-faint: .3;
+  --mesh-candidate: #08744c;
+  --mesh-delete: #bd2742;
+  --mesh-delete-ink: #fff;
+  --tree-slot: #484E5C;
+  --tree-bone: #343945;
+  --tree-image: #2478B8;
+  --tree-image-fill: rgba(36, 120, 184, 0.16);
+  --tree-mesh-node: #0694A2;
+  --tree-mesh-edge: #0E7490;
+  --tree-mesh-wire: #C86D1F;
+  --tree-gutter-line: rgba(15, 23, 42, 0.06);
+  --tree-header-bg: rgba(15, 23, 42, 0.025);
+  --tree-dot: rgba(30, 33, 40, 0.34);
+  --tree-dot-hover: #1E2128;
+  --warn: #8a5300;
+}

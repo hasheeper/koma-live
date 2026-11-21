@@ -1,0 +1,63 @@
+{
+  "rigId": "paper",
+  "rigVersion": 1,
+  "semantics": {
+    "parameters": [
+      {
+        "id": "tiltX",
+        "meaning": "正值向右倾斜",
+        "unit": "°",
+        "min": -10,
+        "max": 10,
+        "default": 0
+      },
+      {
+        "id": "tiltY",
+        "meaning": "正值向上倾斜",
+        "unit": "°",
+        "min": -6,
+        "max": 6,
+        "default": 0
+      }
+    ],
+    "ellipses": [
+      {
+        "x": "tiltX",
+        "y": "tiltY",
+        "a": 10,
+        "b": 6
+      }
+    ],
+    "slots": [
+      {
+        "id": "fold",
+        "default": "rest",
+        "states": [
+          "rest",
+          "bent"
+        ],
+        "transitions": [
+          {
+            "from": "rest",
+            "to": "bent",
+            "minHoldMs": 0,
+            "exitWindowMs": [
+              0,
+              40
+            ]
+          },
+          {
+            "from": "bent",
+            "to": "rest",
+            "minHoldMs": 50,
+            "exitWindowMs": [
+              20,
+              80
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "bindings": []
+}

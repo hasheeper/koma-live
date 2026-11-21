@@ -1,0 +1,9 @@
+{
+  "name": "@koma-rig/rig-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "vite", "build": "vite build", "typecheck": "vue-tsc --noEmit" },
+  "dependencies": { "@koma-rig/rig-core": "0.1.0", "@koma-rig/rig-renderer": "0.1.0", "vue": "3.5.44" },
+  "devDependencies": { "@vitejs/plugin-vue": "6.0.10", "vue-tsc": "3.3.13" }
+}

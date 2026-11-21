@@ -1,0 +1,26 @@
+{
+  "format": "koma-rig.motion.v1",
+  "rigId": "paper",
+  "rigVersion": 1,
+  "durationMs": 800,
+  "tracks": [
+    {
+      "parameter": "tiltX",
+      "keys": [
+        {
+          "timeMs": 0,
+          "value": 0
+        },
+        {
+          "timeMs": 400,
+          "value": 4
+        },
+        {
+          "timeMs": 800,
+          "value": 0
+        }
+      ]
+    }
+  ],
+  "requests": []
+}

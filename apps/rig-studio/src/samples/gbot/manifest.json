@@ -1,0 +1,208 @@
+{
+  "format": "koma-rig.slices.v2",
+  "sourceId": "gbot",
+  "canvas": {
+    "width": 625,
+    "height": 995
+  },
+  "reference": "reference.png",
+  "blendSpace": "srgb",
+  "layers": [
+    {
+      "layerId": "tex-leg_l",
+      "name": "左大腿连杆",
+      "groups": [],
+      "texture": "textures/gBot_leg_l.png",
+      "rect": [
+        282,
+        632,
+        92,
+        153
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tex-shin_l",
+      "name": "左小腿装甲",
+      "groups": [],
+      "texture": "textures/gBot_shin_l.png",
+      "rect": [
+        286,
+        720,
+        99,
+        157
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tex-foot_l",
+      "name": "左靴",
+      "groups": [],
+      "texture": "textures/gBot_foot_l.png",
+      "rect": [
+        277,
+        826,
+        156,
+        89
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tex-arm_l",
+      "name": "左肩甲",
+      "groups": [],
+      "texture": "textures/gBot_arm_l.png",
+      "rect": [
+        330,
+        406,
+        86,
+        174
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tex-forearm_l",
+      "name": "左臂甲与手套",
+      "groups": [],
+      "texture": "textures/gBot_forearm_l.png",
+      "rect": [
+        329,
+        546,
+        102,
+        181
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tex-leg_r",
+      "name": "右大腿连杆",
+      "groups": [],
+      "texture": "textures/gBot_leg_r.png",
+      "rect": [
+        183,
+        642,
+        92,
+        153
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tex-shin_r",
+      "name": "右小腿装甲",
+      "groups": [],
+      "texture": "textures/gBot_shin_r.png",
+      "rect": [
+        187,
+        730,
+        99,
+        157
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tex-foot_r",
+      "name": "右靴",
+      "groups": [],
+      "texture": "textures/gBot_foot_r.png",
+      "rect": [
+        178,
+        836,
+        156,
+        89
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tex-hip",
+      "name": "骨盆外壳",
+      "groups": [],
+      "texture": "textures/gBot_hip.png",
+      "rect": [
+        217,
+        601,
+        140,
+        96
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tex-body",
+      "name": "胸甲",
+      "groups": [],
+      "texture": "textures/gBot_body.png",
+      "rect": [
+        207,
+        363,
+        174,
+        260
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tex-arm_r",
+      "name": "右肩甲",
+      "groups": [],
+      "texture": "textures/gBot_arm_r.png",
+      "rect": [
+        151,
+        399,
+        100,
+        188
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tex-forearm_r",
+      "name": "右臂甲与手套",
+      "groups": [],
+      "texture": "textures/gBot_forearm_r.png",
+      "rect": [
+        140,
+        549,
+        106,
+        198
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tex-head",
+      "name": "头壳",
+      "groups": [],
+      "texture": "textures/gBot_head.png",
+      "rect": [
+        145,
+        70,
+        325,
+        280
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "tex-jaw",
+      "name": "下颌外壳",
+      "groups": [],
+      "texture": "textures/gBot_jaw.png",
+      "rect": [
+        155,
+        290,
+        330,
+        124
+      ],
+      "visible": true,
+      "opacity": 1
+    }
+  ]
+}

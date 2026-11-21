@@ -1,0 +1,465 @@
+{
+  "rigId": "layered-parts",
+  "rigVersion": 1,
+  "semantics": {
+    "parameters": [
+      {
+        "id": "gazeX",
+        "meaning": "正值向右看",
+        "unit": "",
+        "min": -1,
+        "max": 1,
+        "default": 0
+      },
+      {
+        "id": "gazeY",
+        "meaning": "正值向下看",
+        "unit": "",
+        "min": -1,
+        "max": 1,
+        "default": 0
+      },
+      {
+        "id": "blink",
+        "meaning": "1 为全闭眼",
+        "unit": "",
+        "min": 0,
+        "max": 1,
+        "default": 0
+      },
+      {
+        "id": "tilt",
+        "meaning": "正值顺时针",
+        "unit": "°",
+        "min": -10,
+        "max": 10,
+        "default": 0
+      },
+      {
+        "id": "breath",
+        "meaning": "正值向上伸展",
+        "unit": "",
+        "min": -1,
+        "max": 1,
+        "default": 0
+      }
+    ],
+    "ellipses": [
+      {
+        "x": "gazeX",
+        "y": "gazeY",
+        "a": 1,
+        "b": 1
+      }
+    ],
+    "slots": [
+      {
+        "id": "arm",
+        "default": "down",
+        "states": [
+          "down",
+          "touch",
+          "retract"
+        ],
+        "transitions": [
+          {
+            "from": "down",
+            "to": "touch",
+            "minHoldMs": 0,
+            "exitWindowMs": [
+              10,
+              40
+            ]
+          },
+          {
+            "from": "touch",
+            "to": "retract",
+            "minHoldMs": 100,
+            "exitWindowMs": [
+              20,
+              60
+            ]
+          },
+          {
+            "from": "retract",
+            "to": "down",
+            "minHoldMs": 30,
+            "exitWindowMs": [
+              10,
+              40
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "layerId": "body",
+      "pivot": [
+        64,
+        54
+      ],
+      "drives": [
+        {
+          "parameter": "tilt",
+          "degrees": 1
+        }
+      ]
+    },
+    {
+      "layerId": "cap",
+      "parentId": "body",
+      "pivot": [
+        64,
+        52
+      ],
+      "deformer": {
+        "kind": "ffd",
+        "size": 3,
+        "offsets": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            -3
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            -1
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "parameter": "breath",
+        "minArea": 0.01,
+        "minRatio": 0.04
+      }
+    },
+    {
+      "layerId": "ribbon",
+      "parentId": "body",
+      "pivot": [
+        64,
+        49
+      ],
+      "deformer": {
+        "kind": "ribbon",
+        "line": [
+          [
+            5,
+            0,
+            5
+          ],
+          [
+            5,
+            19,
+            5
+          ],
+          [
+            5,
+            39,
+            5
+          ]
+        ],
+        "bend": 1,
+        "maxBend": 5,
+        "parameter": "breath",
+        "minArea": 0.01,
+        "minRatio": 0.04
+      },
+      "spring": {
+        "parameter": "tilt",
+        "stiffness": 16,
+        "damping": 5,
+        "amplitude": 0.8,
+        "hz": 0.55,
+        "phase": 0,
+        "limit": 4
+      }
+    },
+    {
+      "layerId": "leftW",
+      "parentId": "body",
+      "pivot": [
+        52.5,
+        44
+      ]
+    },
+    {
+      "layerId": "leftI",
+      "parentId": "body",
+      "pivot": [
+        52.5,
+        44
+      ]
+    },
+    {
+      "layerId": "leftC",
+      "parentId": "body",
+      "pivot": [
+        52.5,
+        44
+      ]
+    },
+    {
+      "layerId": "rightW",
+      "parentId": "body",
+      "pivot": [
+        81.5,
+        44
+      ]
+    },
+    {
+      "layerId": "rightI",
+      "parentId": "body",
+      "pivot": [
+        81.5,
+        44
+      ]
+    },
+    {
+      "layerId": "rightC",
+      "parentId": "body",
+      "pivot": [
+        81.5,
+        44
+      ]
+    },
+    {
+      "layerId": "down",
+      "pivot": [
+        87,
+        51
+      ],
+      "parentId": "body",
+      "variant": {
+        "slot": "arm",
+        "state": "down",
+        "contact": []
+      }
+    },
+    {
+      "layerId": "touch",
+      "pivot": [
+        87,
+        51
+      ],
+      "parentId": "body",
+      "variant": {
+        "slot": "arm",
+        "state": "touch",
+        "contact": [
+          "tilt"
+        ]
+      }
+    },
+    {
+      "layerId": "retract",
+      "pivot": [
+        87,
+        51
+      ],
+      "parentId": "body",
+      "variant": {
+        "slot": "arm",
+        "state": "retract",
+        "contact": []
+      }
+    }
+  ],
+  "eyes": [
+    {
+      "white": "leftW",
+      "iris": "leftI",
+      "closed": "leftC",
+      "head": "body",
+      "center": [
+        52.5,
+        44
+      ],
+      "radius": [
+        9,
+        6
+      ],
+      "travel": [
+        2,
+        1.4
+      ],
+      "x": "gazeX",
+      "y": "gazeY",
+      "blink": "blink",
+      "threshold": 0.95,
+      "corners": [
+        [
+          -0.15,
+          -0.1
+        ],
+        [
+          0.15,
+          -0.1
+        ],
+        [
+          -0.15,
+          0.1
+        ],
+        [
+          0.15,
+          0.1
+        ]
+      ]
+    },
+    {
+      "white": "rightW",
+      "iris": "rightI",
+      "closed": "rightC",
+      "head": "body",
+      "center": [
+        81.5,
+        44
+      ],
+      "radius": [
+        9,
+        6
+      ],
+      "travel": [
+        2,
+        1.4
+      ],
+      "x": "gazeX",
+      "y": "gazeY",
+      "blink": "blink",
+      "threshold": 0.95,
+      "corners": [
+        [
+          -0.15,
+          -0.1
+        ],
+        [
+          0.15,
+          -0.1
+        ],
+        [
+          -0.15,
+          0.1
+        ],
+        [
+          0.15,
+          0.1
+        ]
+      ]
+    }
+  ],
+  "gates": [
+    {
+      "slot": "arm",
+      "from": "down",
+      "to": "touch",
+      "anchors": [
+        {
+          "from": {
+            "layerId": "down",
+            "local": [
+              1,
+              1
+            ]
+          },
+          "to": {
+            "layerId": "touch",
+            "local": [
+              1,
+              4
+            ]
+          },
+          "tolerancePx": 0.1
+        }
+      ]
+    },
+    {
+      "slot": "arm",
+      "from": "touch",
+      "to": "retract",
+      "anchors": [
+        {
+          "from": {
+            "layerId": "touch",
+            "local": [
+              1,
+              4
+            ]
+          },
+          "to": {
+            "layerId": "retract",
+            "local": [
+              1,
+              2
+            ]
+          },
+          "tolerancePx": 0.1
+        }
+      ]
+    },
+    {
+      "slot": "arm",
+      "from": "retract",
+      "to": "down",
+      "anchors": [
+        {
+          "from": {
+            "layerId": "retract",
+            "local": [
+              1,
+              2
+            ]
+          },
+          "to": {
+            "layerId": "down",
+            "local": [
+              1,
+              1
+            ]
+          },
+          "tolerancePx": 0.1
+        }
+      ]
+    }
+  ],
+  "guidance": {
+    "recommendedDurationMs": [
+      400,
+      2400
+    ],
+    "conditions": [
+      {
+        "slot": "arm",
+        "from": "touch",
+        "to": "retract",
+        "meaning": "接触点对齐后可收回，等待驻留与退场窗口。"
+      }
+    ]
+  }
+}

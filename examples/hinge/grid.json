@@ -1,0 +1,54 @@
+[
+  {
+    "op": "set-parameter",
+    "parameter": {
+      "id": "bend",
+      "meaning": "正值使方格纸的自由边下弯",
+      "unit": "",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    }
+  },
+  {
+    "op": "create-ffd",
+    "layerId": "tip",
+    "parameter": "bend",
+    "size": 3,
+    "locked": [
+      0,
+      3,
+      6
+    ],
+    "maxDisplacementPx": 8,
+    "minArea": 0.01,
+    "minRatio": 0.05
+  },
+  {
+    "op": "ffd-point",
+    "layerId": "tip",
+    "index": 2,
+    "offset": [
+      0,
+      8
+    ]
+  },
+  {
+    "op": "ffd-point",
+    "layerId": "tip",
+    "index": 5,
+    "offset": [
+      0,
+      8
+    ]
+  },
+  {
+    "op": "ffd-point",
+    "layerId": "tip",
+    "index": 8,
+    "offset": [
+      0,
+      8
+    ]
+  }
+]

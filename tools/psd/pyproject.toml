@@ -1,0 +1,10 @@
+[project]
+name = "layer-rig-psd"
+version = "0.1.0"
+description = "Export layered artwork and verify Koma Rig slice packages"
+requires-python = ">=3.11"
+dependencies = ["numpy>=2,<3", "psd-tools>=1.10,<2", "pillow>=10.3"]
+
+[build-system]
+requires = ["uv_build>=0.13,<0.14"]
+build-backend = "uv_build"

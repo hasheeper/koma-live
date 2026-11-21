@@ -1,0 +1,26 @@
+{
+  "format": "koma-rig.slices.v2",
+  "sourceId": "chain-strip",
+  "canvas": {
+    "width": 160,
+    "height": 128
+  },
+  "reference": "reference.png",
+  "blendSpace": "srgb",
+  "layers": [
+    {
+      "layerId": "strip",
+      "name": "纸带",
+      "groups": [],
+      "texture": "textures/strip.png",
+      "rect": [
+        16,
+        56,
+        112,
+        16
+      ],
+      "visible": true,
+      "opacity": 1
+    }
+  ]
+}

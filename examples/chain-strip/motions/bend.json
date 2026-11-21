@@ -1,0 +1,10 @@
+{
+  "format": "koma-rig.motion.v1",
+  "rigId": "chain-strip",
+  "rigVersion": 1,
+  "durationMs": 1800,
+  "tracks": [
+    {"parameter":"bend","keys":[{"timeMs":0,"value":0},{"timeMs":800,"value":40},{"timeMs":1800,"value":0}]}
+  ],
+  "requests": []
+}

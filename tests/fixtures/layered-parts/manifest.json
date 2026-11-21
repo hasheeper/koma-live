@@ -1,0 +1,195 @@
+{
+  "format": "koma-rig.slices.v2",
+  "blendSpace": "srgb",
+  "sourceId": "layered-parts",
+  "canvas": {
+    "width": 128,
+    "height": 96
+  },
+  "reference": "reference.png",
+  "layers": [
+    {
+      "layerId": "ribbon",
+      "name": "条带",
+      "groups": [],
+      "texture": "textures/ribbon.png",
+      "rect": [
+        59,
+        49,
+        10,
+        39
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "body",
+      "name": "下层",
+      "groups": [],
+      "texture": "textures/body.png",
+      "rect": [
+        28,
+        26,
+        72,
+        46
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "cap",
+      "name": "带孔的覆盖层",
+      "groups": [],
+      "texture": "textures/cap.png",
+      "rect": [
+        18,
+        9,
+        92,
+        45
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "leftW",
+      "name": "眼白 left",
+      "groups": [],
+      "texture": "textures/leftW.png",
+      "rect": [
+        46,
+        40,
+        13,
+        8
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "leftI",
+      "name": "虹膜 left",
+      "groups": [],
+      "texture": "textures/leftI.png",
+      "rect": [
+        50,
+        41,
+        5,
+        6
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "leftC",
+      "name": "闭眼 left",
+      "groups": [],
+      "texture": "textures/leftC.png",
+      "rect": [
+        46,
+        44,
+        13,
+        2
+      ],
+      "visible": false,
+      "opacity": 1
+    },
+    {
+      "layerId": "rightW",
+      "name": "眼白 right",
+      "groups": [],
+      "texture": "textures/rightW.png",
+      "rect": [
+        75,
+        40,
+        13,
+        8
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "rightI",
+      "name": "虹膜 right",
+      "groups": [],
+      "texture": "textures/rightI.png",
+      "rect": [
+        79,
+        41,
+        5,
+        6
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "rightC",
+      "name": "闭眼 right",
+      "groups": [],
+      "texture": "textures/rightC.png",
+      "rect": [
+        75,
+        44,
+        13,
+        2
+      ],
+      "visible": false,
+      "opacity": 1
+    },
+    {
+      "layerId": "down",
+      "name": "down",
+      "groups": [],
+      "texture": "textures/down.png",
+      "rect": [
+        86,
+        50,
+        8,
+        18
+      ],
+      "visible": true,
+      "opacity": 1
+    },
+    {
+      "layerId": "touch",
+      "name": "touch",
+      "groups": [],
+      "texture": "textures/touch.png",
+      "rect": [
+        86,
+        47,
+        18,
+        9
+      ],
+      "visible": false,
+      "opacity": 1
+    },
+    {
+      "layerId": "retract",
+      "name": "retract",
+      "groups": [],
+      "texture": "textures/retract.png",
+      "rect": [
+        86,
+        49,
+        13,
+        13
+      ],
+      "visible": false,
+      "opacity": 1
+    }
+  ],
+  "gelGroups": [
+    {
+      "opacity": 0.78,
+      "members": [
+        {
+          "layerId": "body",
+          "coverage": "textures/body-coverage.png"
+        },
+        {
+          "layerId": "cap",
+          "coverage": "textures/cap-coverage.png"
+        }
+      ]
+    }
+  ]
+}

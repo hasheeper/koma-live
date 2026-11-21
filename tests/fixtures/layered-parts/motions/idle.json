@@ -1,0 +1,68 @@
+{
+  "format": "koma-rig.motion.v1",
+  "rigId": "layered-parts",
+  "rigVersion": 1,
+  "durationMs": 800,
+  "tracks": [
+    {
+      "parameter": "breath",
+      "keys": [
+        {
+          "timeMs": 0,
+          "value": 0
+        },
+        {
+          "timeMs": 200,
+          "value": 1
+        },
+        {
+          "timeMs": 600,
+          "value": -1
+        },
+        {
+          "timeMs": 800,
+          "value": 0
+        }
+      ]
+    },
+    {
+      "parameter": "gazeX",
+      "keys": [
+        {
+          "timeMs": 0,
+          "value": 0
+        },
+        {
+          "timeMs": 400,
+          "value": 0.7
+        },
+        {
+          "timeMs": 800,
+          "value": 0
+        }
+      ]
+    },
+    {
+      "parameter": "tilt",
+      "keys": [
+        {
+          "timeMs": 0,
+          "value": 0
+        },
+        {
+          "timeMs": 300,
+          "value": 3
+        },
+        {
+          "timeMs": 650,
+          "value": -1
+        },
+        {
+          "timeMs": 800,
+          "value": 0
+        }
+      ]
+    }
+  ],
+  "requests": []
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@koma-rig/rig-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@koma-rig/rig-core": "0.1.0"
+  }
+}
