@@ -13,7 +13,8 @@
   <a href="#ai-演出协作">AI 协作</a> ·
   <a href="#工程架构">工程架构</a> ·
   <a href="#快速开始">快速开始</a> ·
-  <a href="#文档导航">文档</a>
+  <a href="#文档导航">文档</a> ·
+  <a href="LICENSE">使用许可</a>
 </p>
 
 ![Koma Live 工作区一览：左上 Koma Rig 搭建与轮廓网格、右上 Koma Live 动帧演出、左下 Koma Rig 试动 TRS、右下 Koma Live 同轴审查与互动](docs/assets/screenshots/workspaces.jpg)
@@ -230,3 +231,12 @@ uv run --locked --project tools/psd python -m unittest discover -s tools/psd/tes
 
 - **GBot 内置示例角色**：由 Andreas Esau 绘制，素材源自 Godot 文档项目示例（Juan Linietsky、Ariel Manzur 与 Godot 社区），按 [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) 许可使用（详见 [credits.txt](apps/rig-studio/public/credits.txt)）。
 - **Koma 家族设计资产与开源栈**：PixiJS v8、Vue、Vite、Zod、Playwright、psd-tools、Pillow，以及 Resource Han Rounded（资源圆体）、Fredoka、JetBrains Mono 等开源字体与图标项目。
+
+## ⚖️ 使用许可
+
+本项目自有源码、界面设计、品牌美术资源与 Agent 技能提示词采用 **[Koma 署名—非商业使用许可 1.0](LICENSE)**：
+
+- **允许**：个人自用、学习研究、社区交流，以及非商业性质的二次修改与分享；公开分发或二改时须显著保留原作者署名、本仓库链接与许可证文本。
+- **禁止商业化与去署名套壳**：严禁将本项目或其衍生版本用于任何商业用途，严禁抹除原作者署名后包装为原创产品发布或引流。
+
+内置第三方资源继续适用其各自许可（详见 [credits.txt](apps/rig-studio/public/credits.txt)）。用户自行提供的立绘素材、切片、骨架与演出作品归原权利人所有，不受本许可主张所有权。
