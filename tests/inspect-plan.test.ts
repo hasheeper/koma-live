@@ -25,7 +25,7 @@ describe('koma-rig.inspect.v1 validation & grouping (apps/rig-cli boundary)', ()
   it('validates all four panel primitives, alpha channel, and rejects invalid plans', () => {
     const plan = validateInspectPlan({
       format: 'koma-rig.inspect.v1',
-      source: { work: './examples/live-demo/koma-work.json' },
+      source: { work: './tests/fixtures/live-demo/koma-work.json' },
       timeline: [
         { at: 0, state: 'breeze' },
         { at: 120, trigger: 'flick' },
@@ -105,7 +105,7 @@ describe('koma-rig.inspect.v1 validation & grouping (apps/rig-cli boundary)', ()
     expect(planMode).toEqual({ mode: 'plan', planPath: '-', outDirOverride: '.tmp/custom' })
 
     const shortcut = parseCliArgs([
-      './examples/live-demo/koma-work.json',
+      './tests/fixtures/live-demo/koma-work.json',
       '--state',
       'gust@0',
       '--trigger',
@@ -142,7 +142,7 @@ describe('koma-rig.inspect.v1 validation & grouping (apps/rig-cli boundary)', ()
     // 1) Directory with saved rig.json -> prints koma-rig.spec.v1 directly to stdout
     const { stdout: demoOut } = await execFileAsync(
       process.execPath,
-      [rigCli, 'spec', join(repoRoot, 'examples/live-demo/slices')],
+      [rigCli, 'spec', join(repoRoot, 'tests/fixtures/live-demo/slices')],
       { cwd: repoRoot },
     )
     const demoSpec = JSON.parse(demoOut)
@@ -150,9 +150,19 @@ describe('koma-rig.inspect.v1 validation & grouping (apps/rig-cli boundary)', ()
     expect(demoSpec.bones.map((b: { boneId: string }) => b.boneId)).toEqual(['base', 'tip'])
 
     // 2) Source directory with setup.json only (no rig.json) -> synthesizes skeleton in memory
+    const { stdout: chainOut } = await execFileAsync(
+      process.execPath,
+      [rigCli, 'spec', join(repoRoot, 'tests/fixtures/chain-strip')],
+      { cwd: repoRoot },
+    )
+    const chainSpec = JSON.parse(chainOut)
+    expect(chainSpec.format).toBe('koma-rig.spec.v1')
+    expect(chainSpec.bones.map((b: { boneId: string }) => b.boneId)).toEqual(['base', 'tip'])
+
+    // 3) GBot example directory + atomic output path write
     const { stdout: gbotOut } = await execFileAsync(
       process.execPath,
-      [rigCli, 'spec', join(repoRoot, 'apps/rig-studio/src/samples/gbot')],
+      [rigCli, 'spec', join(repoRoot, 'examples/gbot/slices')],
       { cwd: repoRoot },
     )
     const gbotSpec = JSON.parse(gbotOut)
@@ -161,13 +171,12 @@ describe('koma-rig.inspect.v1 validation & grouping (apps/rig-cli boundary)', ()
     expect(gbotSpec.bones.length).toBe(14)
     expect(gbotSpec.bones.some((b: { boneId: string }) => b.boneId === 'foot_r')).toBe(true)
 
-    // 3) Optional output path writes rig-spec.json atomically
     const tempDir = await mkdtemp(join(tmpdir(), 'koma-rig-spec-'))
     try {
       const outPath = join(tempDir, 'rig-spec.json')
       const { stdout: fileSummary } = await execFileAsync(
         process.execPath,
-        [rigCli, 'spec', join(repoRoot, 'apps/rig-studio/src/samples/gbot'), outPath],
+        [rigCli, 'spec', join(repoRoot, 'examples/gbot/slices'), outPath],
         { cwd: repoRoot },
       )
       const meta = JSON.parse(fileSummary)

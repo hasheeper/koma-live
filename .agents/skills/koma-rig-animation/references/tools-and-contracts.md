@@ -281,17 +281,17 @@ export default function createPerformance(ctx) {
 
 ```sh
 # 快捷单板审片
-npm run inspect:live -- ./examples/live-demo/koma-work.json \
-  --state gust --trigger flick@120 \
-  --times 0,120,260,420 --onion 120..360:6 --arcs tip.end \
+npm run inspect:live -- ./examples/gbot/koma-work.json \
+  --state happy --trigger wave@120 \
+  --times 0,120,260,420 --onion 120..420:6 --arcs forearm_r.end \
   --out .tmp/inspect
 
 # 自由多分栏审片板（stdin 传入 koma-rig.inspect.v1 JSON）
 cat <<'EOF' | npm run inspect:live -- --plan -
 {
   "format": "koma-rig.inspect.v1",
-  "source": { "work": "./examples/dkh/koma-work.json" },
-  "outDir": ".tmp/inspect-dkh",
+  "source": { "work": "./examples/gbot/koma-work.json" },
+  "outDir": ".tmp/inspect-gbot",
   "exportTelemetry": true,
   "timeline": [
     { "at": 0, "state": "idle" },

@@ -365,5 +365,5 @@ live.setState('happy')
 | 契约校验与 4 条护栏纯数学/状态机 | [work.ts](../packages/rig-core/src/work.ts) · [work.test.ts](../packages/rig-core/test/work.test.ts) |
 | 统一承载运行时 `mountPerformance` | [performance.ts](../packages/rig-renderer/src/performance.ts) · [runtime.ts](../packages/rig-renderer/src/runtime.ts) → `packages/rig-renderer/dist/runtime/player.js` |
 | Koma Live 动帧工坊与顶栏一键切换 | [KomaLive.vue](../apps/rig-studio/src/KomaLive.vue) · [live-work.ts](../apps/rig-studio/src/live-work.ts) · [App.vue](../apps/rig-studio/src/App.vue) |
-| 单文件自包含样板作品 | [gbot/performance.js](../apps/rig-studio/src/samples/gbot/performance.js) · [koma-work.json](../examples/live-demo/koma-work.json) · [chain-live.js](../examples/live-demo/motion/chain-live.js) |
+| 单文件自包含样板作品 | [koma-work.json](../examples/gbot/koma-work.json) · [gbot-live.js](../examples/gbot/motion/gbot-live.js) |
 | 端到端浏览器回归（Retina 2× DPR） | [koma-live.browser.mjs](../tests/koma-live.browser.mjs)（`npm run test:live`） |

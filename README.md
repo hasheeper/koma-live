@@ -72,7 +72,7 @@ Koma Live 采用与 **Spine / Live2D** 一致的展示型解耦架构：**编辑
 npm run build:runtime
 
 # 将作品导出为纯净只读展示包（自动校验并剔除 setup.json、id-map.json 等制作源文件）
-npm run rig -- export-work examples/dkh ./dist-work/dkh --runtime ./dist-work/koma-live --no-poster
+npm run rig -- export-work examples/gbot ./dist-work/gbot --runtime ./dist-work/koma-live --no-poster
 ```
 
 ### 2. 三种运行时入口
@@ -191,7 +191,7 @@ npm run dev -- --host 127.0.0.1 --port 5186
 
 # 直达动帧工坊或指定本地作品目录
 # http://127.0.0.1:5186/?view=live
-# http://127.0.0.1:5186/?view=live&work=examples/dkh
+# http://127.0.0.1:5186/?view=live&work=examples/gbot
 
 # 严格类型检查、独立运行时构建与静态工作台构建
 npm run build
@@ -227,7 +227,7 @@ uv run --locked --project tools/psd python -m unittest discover -s tools/psd/tes
 
 - **规格与工作台**：[功能规格](docs/implementation-plan.md) · [工作台说明](docs/studio-layout-plan.md) · [编辑器参考](docs/editor-references.md)
 - **演出与验收契约**：[演出契约](docs/performance-contract.md) · [动帧视觉验收](docs/live-inspection-plan.md) · [AI 演出技能](.agents/skills/koma-rig-animation/SKILL.md)
-- **离线制作与维护**：[离线制作与验收](docs/offline-authoring.md) · [分层拆分调研](docs/layer-decomposition-research.md) · [维护交接](docs/maintenance-handoff.md)
+- **离线制作与维护**：[离线制作与验收](docs/offline-authoring.md) · [维护交接](docs/maintenance-handoff.md)
 - **兄弟项目**：[Koma Image](https://github.com/hasheeper/koma-image)（[在线体验](https://koma-image.pages.dev/) · 静帧生图与 EDIT 内 [Koma Layer](https://github.com/hasheeper/koma-image/blob/main/docs/workspaces/layer.md) 立绘拆层，上游直出 `koma-rig.slices.v2` 与分层 PSD）
 
 ## 💜 致谢

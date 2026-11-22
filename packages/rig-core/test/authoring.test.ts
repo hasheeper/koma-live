@@ -9,9 +9,9 @@ import {
   sliceManifestSchema,
   transform,
 } from '../src/index'
-import manifestJson from '../../../examples/paper/manifest.json'
-import paper from '../../../examples/paper/rig.json'
-import tilt from '../../../examples/paper/motions/tilt.json'
+import manifestJson from '../../../tests/fixtures/paper/manifest.json'
+import paper from '../../../tests/fixtures/paper/rig.json'
+import tilt from '../../../tests/fixtures/paper/motions/tilt.json'
 
 const manifest = sliceManifestSchema.parse(manifestJson)
 const empty = emptyRig('paper')

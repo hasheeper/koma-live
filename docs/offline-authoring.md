@@ -6,12 +6,12 @@
 
 ## 用两张纸条走完离线流程
 
-两根骨各长 `56 px`，蓝纸条与黄纸条在画布点 `(76, 40)` 铰接。先导入临时企划，切片合成与独立参考图的像素对照通过后才创建目录。[示例素材](../examples/hinge/manifest.json) · [建骨与绑层操作](../examples/hinge/setup.json) · [可选晶格操作](../examples/hinge/grid.json)
+两根骨各长 `56 px`，蓝纸条与黄纸条在画布点 `(76, 40)` 铰接。先导入临时企划，切片合成与独立参考图的像素对照通过后才创建目录。[测试夹具](../tests/fixtures/hinge/manifest.json) · [建骨与绑层操作](../tests/fixtures/hinge/setup.json) · [可选晶格操作](../tests/fixtures/hinge/grid.json)
 
 ```sh
 work=$(mktemp -d)
-npm run rig -- import examples/hinge "$work/hinge"
-npm run rig -- edit "$work/hinge" examples/hinge/setup.json
+npm run rig -- import tests/fixtures/hinge "$work/hinge"
+npm run rig -- edit "$work/hinge" tests/fixtures/hinge/setup.json
 npm run rig -- inspect "$work/hinge"
 npm run rig -- save "$work/hinge"
 npm run rig -- verify-slices "$work/hinge"
@@ -27,12 +27,12 @@ npm run rig -- render "$work/hinge" "$work/rest.png"
 
 ```sh
 work=$(mktemp -d)
-npm run rig -- import examples/chain-strip "$work/strip"
-npm run rig -- edit "$work/strip" examples/chain-strip/setup.json
+npm run rig -- import tests/fixtures/chain-strip "$work/strip"
+npm run rig -- edit "$work/strip" tests/fixtures/chain-strip/setup.json
 npm run rig -- render "$work/strip" "$work/rest.png"
-npm run rig -- render "$work/strip" "$work/bent.png" examples/chain-strip/bend.json
+npm run rig -- render "$work/strip" "$work/bent.png" tests/fixtures/chain-strip/bend.json
 npm run rig -- save "$work/strip"
-npm run rig -- sample "$work/strip/rig.json" examples/chain-strip/motions/bend.json 800
+npm run rig -- sample "$work/strip/rig.json" tests/fixtures/chain-strip/motions/bend.json 800
 ```
 
 `sample` 与 `render` 在姿势求值后自动执行三角形翻面、退化与自交体检，报错直接定位部件、毫秒与三角形索引。
@@ -43,11 +43,11 @@ npm run rig -- sample "$work/strip/rig.json" examples/chain-strip/motions/bend.j
 
 ```sh
 # 默认仅为缺网格的 boneChain 图层生成低凹度防翻面轮廓网格（detail:28, concavity:10, padding:4）
-npm run rig -- auto-mesh examples/dkh --dry-run
-npm run rig -- auto-mesh examples/dkh
+npm run rig -- auto-mesh <你的作品或切片目录> --dry-run
+npm run rig -- auto-mesh <你的作品或切片目录>
 
 # 扫描所有 boneChain 逐节与联动最大无翻面转角，低于阈值自动标记 warn
-npm run rig -- check-bend examples/dkh --max-angle 75 --warn-below 18
+npm run rig -- check-bend <你的作品或切片目录> --max-angle 75 --warn-below 18
 ```
 
 若源 PSD 存在角落孤立脏点或整画布低透明雾噪，可直接单命令去噪并烘焙干净 `reference.png`（内置 0 误差复验并输出逐层清理 JSON 报告）：

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { capabilitiesJsonSchema, exportCapabilities, validateMotion } from '../src/agent'
-import rig from '../../../examples/rig.json'
-import motion from '../../../examples/paper/motions/tilt.json'
+import rig from '../../../tests/fixtures/rig.json'
+import motion from '../../../tests/fixtures/paper/motions/tilt.json'
 
 describe('external motion drafts', () => {
   it('projects only AI fields and emits a closed JSON Schema', () => {

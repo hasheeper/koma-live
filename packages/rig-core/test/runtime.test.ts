@@ -14,10 +14,10 @@ import {
   createInteractionPlayer,
   auditMotions,
 } from '../src/index'
-import paper from '../../../examples/paper/rig.json'
-import paperManifest from '../../../examples/paper/manifest.json'
-import tilt from '../../../examples/paper/motions/tilt.json'
-import sway from '../../../examples/paper/motions/sway.json'
+import paper from '../../../tests/fixtures/paper/rig.json'
+import paperManifest from '../../../tests/fixtures/paper/manifest.json'
+import tilt from '../../../tests/fixtures/paper/motions/tilt.json'
+import sway from '../../../tests/fixtures/paper/motions/sway.json'
 import partsRig from '../../../tests/fixtures/layered-parts/rig.json'
 import fixtureManifest from '../../../tests/fixtures/layered-parts/manifest.json'
 import idle from '../../../tests/fixtures/layered-parts/motions/idle.json'

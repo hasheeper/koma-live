@@ -72,14 +72,14 @@
 ### 3.2 输入源与自由剧本原语（`source` & `timeline`）
 
 支持任意目录结构（`koma-work.json`、含 `koma-work.json` 或 `manifest.json` 的目录简写，或直接指定 `rig` 目录 + 单文件 `performance.js`），不绑定任何仓库路径约定：
-- **源目录 `setup.json` 零落盘自动合成**：若目标切片目录尚无 `rig.json` 但含 `setup.json`（如 `apps/rig-studio/src/samples/gbot`、`examples/chain-strip` 等源目录），`inspect:live`、`rig spec` 以及 Koma Studio / Koma Live 本地目录载入均会在内存中自动执行 `editRig(manifest, emptyRig, setup.json)` 动态合成骨架（无 `setup.json` 则退回空骨架），不修改原目录；并在启动 Chromium 前提前校验 `manifest.json` / `setup.json` 以即时暴露清晰报错。
+- **源目录 `setup.json` 零落盘自动合成**：若目标切片目录尚无 `rig.json` 但含 `setup.json`（如 `tests/fixtures/chain-strip` 等源目录），`inspect:live`、`rig spec` 以及 Koma Studio / Koma Live 本地目录载入均会在内存中自动执行 `editRig(manifest, emptyRig, setup.json)` 动态合成骨架（无 `setup.json` 则退回空骨架），不修改原目录；并在启动 Chromium 前提前校验 `manifest.json` / `setup.json` 以即时暴露清晰报错。
 - **配套 CLI 骨架快查**：写脚本前可直接运行 `npm run rig -- spec <目录> [输出.json]` 零落盘打印或导出 `rig-spec.json`（同样兼容 `rig.json` 与 `setup.json` 源目录）。
 
 ```json
 {
   "format": "koma-rig.inspect.v1",
   "source": {
-    "work": "./examples/live-demo/koma-work.json",
+    "work": "./examples/gbot/koma-work.json",
     "viewport": { "fit": "contain", "anchor": [0.5, 1.0] }
   },
   "stepMs": 10,
@@ -202,7 +202,7 @@ Agent 可以一次声明生成 **1 张或多张 PNG 审片板**；每张画板�
    ```
 2. **快捷模式（内部自动翻译为标准 `koma-rig.inspect.v1` 清单）**：
    ```sh
-   npm run inspect:live -- ./examples/live-demo/koma-work.json \
+   npm run inspect:live -- ./examples/gbot/koma-work.json \
      --state gust --trigger flick@120 \
      --times 0,120,220,340,520,800 \
      --onion 120..620:8 --arcs tip.end \
@@ -321,7 +321,7 @@ Agent 可以一次声明生成 **1 张或多张 PNG 审片板**；每张画板�
    - 已同步沉淀至 [SKILL.md](../.agents/skills/koma-rig-animation/SKILL.md)、[tools-and-contracts.md](../.agents/skills/koma-rig-animation/references/tools-and-contracts.md) 与 [craft-and-playbooks.md](../.agents/skills/koma-rig-animation/references/craft-and-playbooks.md)。
 
 ### 第二步（已完成）：重做 GBot 纯刚体机器人动画并用 `inspect:live` 逐帧验收
-- 已按刚体规范（全骨 `scale = 1` + 2-Bone IK 双脚焊地 + 5 段重金属跳跃 + 干净招手 + 硬金属受击 + 地板钳制 2D 机械特效）重写 [gbot/performance.js](../apps/rig-studio/src/samples/gbot/performance.js)，通过两轮自由排版审片板迭代修复全部细节，并将全骨 `effectiveScale === [1, 1]` 与地面 0px 焊地不变量锁定在 `npm run test:live` 回归中。
+- 已按刚体规范（全骨 `scale = 1` + 2-Bone IK 双脚焊地 + 5 段重金属跳跃 + 干净招手 + 硬金属受击 + 地板钳制 2D 机械特效）重写 [gbot-live.js](../examples/gbot/motion/gbot-live.js)，通过两轮自由排版审片板迭代修复全部细节，并将全骨 `effectiveScale === [1, 1]` 与地面 0px 焊地不变量锁定在 `npm run test:live` 回归中。
 
 ### 第三步（按需）：Koma Live 网页端轻量洋葱皮开关
 - 在 [KomaLive.vue](../apps/rig-studio/src/KomaLive.vue) 审查层增加暂停态影子帧开关（零实时播放开销）。

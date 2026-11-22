@@ -824,7 +824,6 @@ onBeforeUnmount(() => {
               当前工作台 · {{ studioProject.name }}
             </button>
             <button @click="loadWork(() => builtinLiveWork('gbot'))">GBot · 活体动帧</button>
-            <button @click="loadWork(() => builtinLiveWork('chain'))">整张纸带 · 骨链柔风</button>
           </nav>
         </div>
       </div>

@@ -1,5 +1,4 @@
 import {
-  meshFromAlpha,
   createRig,
   editRig,
   emptyRig,
@@ -17,19 +16,11 @@ import {
   type DirectorySource,
   type ResolvedSourceLayout,
 } from './local-session'
-import stripChain from '../../../examples/chain-strip/manifest.json'
-import chainSetup from '../../../examples/chain-strip/setup.json'
-import character from './samples/gbot/manifest.json'
-import characterSetup from './samples/gbot/setup.json'
-import strips from '../../../examples/hinge/manifest.json'
-import stripSetup from '../../../examples/hinge/setup.json'
+import character from '../../../examples/gbot/slices/manifest.json'
+import characterRig from '../../../examples/gbot/slices/rig.json'
 
 const sampleImages = import.meta.glob<string>(
-  [
-    './samples/gbot/{reference.png,textures/*.png}',
-    '../../../examples/hinge/{reference.png,textures/*.png}',
-    '../../../examples/chain-strip/{reference.png,textures/*.png}',
-  ],
+  ['../../../examples/gbot/slices/{reference.png,textures/*.png}'],
   { eager: true, query: '?url', import: 'default' },
 )
 
@@ -91,14 +82,9 @@ function texturePaths(manifest: SliceManifest) {
   return paths
 }
 
-export async function example(which: 'gbot' | 'paper' | 'empty' | 'chain') {
-  const robot = which === 'gbot'
-  const manifest = sliceManifestSchema.parse(robot ? character : which === 'chain' ? stripChain : strips)
-  const prefix = robot
-    ? './samples/gbot/'
-    : which === 'chain'
-      ? '../../../examples/chain-strip/'
-      : '../../../examples/hinge/'
+export async function example(_which: 'gbot' = 'gbot') {
+  const manifest = sliceManifestSchema.parse(character)
+  const prefix = '../../../examples/gbot/slices/'
   const files = new Map<string, Blob>()
   await Promise.all(
     [manifest.reference, ...texturePaths(manifest)].map(async (path) => {
@@ -109,27 +95,7 @@ export async function example(which: 'gbot' | 'paper' | 'empty' | 'chain') {
       files.set(path, await response.blob())
     }),
   )
-  const initial = emptyRig(manifest.sourceId)
-  const rig =
-    which === 'empty'
-      ? initial
-      : editRig(manifest, initial, robot ? characterSetup : which === 'chain' ? chainSetup : stripSetup)
-  const project = await prepare(
-    robot ? '多图层练习' : which === 'chain' ? '整张纸带' : '纸条',
-    manifest,
-    files,
-    rig,
-    false,
-  )
-  if (robot) {
-    const id = characterSetup.find((edit) => edit.op === 'bind' && edit.boneId === 'forearm_r')?.layerId
-    const layer = manifest.layers.find((l) => l.layerId === id)
-    if (layer) {
-      const mesh = meshFromAlpha(project.alpha.get(layer.layerId)!, layer.rect[2], layer.rect[3])
-      project.rig = editRig(manifest, rig, [{ op: 'set-mesh', layerId: layer.layerId, mesh }])
-    }
-  }
-  return project
+  return prepare('GBot · 角色骨架', manifest, files, structuredClone(characterRig), false)
 }
 
 export async function projectFromSource(source: DirectorySource): Promise<Project> {

@@ -1,9 +1,9 @@
 import { expect, it } from 'vitest'
 import { createRig, editRig, emptyRig, exportRigSpec, previewRig, sliceManifestSchema } from '../src/index'
-import stripManifestJson from '../../../examples/chain-strip/manifest.json'
-import stripSetup from '../../../examples/chain-strip/setup.json'
-import hingeManifestJson from '../../../examples/hinge/manifest.json'
-import hingeSetup from '../../../examples/hinge/setup.json'
+import stripManifestJson from '../../../tests/fixtures/chain-strip/manifest.json'
+import stripSetup from '../../../tests/fixtures/chain-strip/setup.json'
+import hingeManifestJson from '../../../tests/fixtures/hinge/manifest.json'
+import hingeSetup from '../../../tests/fixtures/hinge/setup.json'
 
 const stripManifest = sliceManifestSchema.parse(stripManifestJson)
 const hingeManifest = sliceManifestSchema.parse(hingeManifestJson)

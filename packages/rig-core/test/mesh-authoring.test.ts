@@ -1,8 +1,8 @@
 import { expect, it } from 'vitest'
 import {createRig, defaultTrace, editRig, emptyRig, exportCapabilities, meshEdges, meshFromAlpha, meshFromContour,
   previewRig, removeMeshVertex, restMesh, retessellateOutline, sliceManifestSchema, splitMeshEdge, suggestAlphaThreshold, type Point} from '../src/index'
-import rawManifest from '../../../examples/hinge/manifest.json'
-import gridSetup from '../../../examples/hinge/grid.json'
+import rawManifest from '../../../tests/fixtures/hinge/manifest.json'
+import gridSetup from '../../../tests/fixtures/hinge/grid.json'
 
 const outline:Point[]=[[0,0],[48,0],[48,12],[20,12],[20,32],[0,32]]
 it('keeps the concave notch in either drawing direction and rejects self-intersection',()=>{

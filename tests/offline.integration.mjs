@@ -22,7 +22,7 @@ async function setup(t) {
   const temp = await mkdtemp(join(tmpdir(), 'koma-rig-test-'))
   t.after(() => rm(temp, { recursive: true, force: true }))
   const dir = join(temp, 'hinge')
-  await cp(join(root, 'examples/hinge'), dir, { recursive: true })
+  await cp(join(root, 'tests/fixtures/hinge'), dir, { recursive: true })
   await cli('edit', dir, join(dir, 'setup.json'))
   return { dir, temp }
 }
@@ -76,7 +76,7 @@ test('reimport retains source IDs through explicit mapping and rejects a missing
   await cli('save', dir)
   const next = join(temp, 'slices'),
     out = join(temp, 'converted')
-  await cp(join(root, 'examples/hinge'), next, { recursive: true })
+  await cp(join(root, 'tests/fixtures/hinge'), next, { recursive: true })
   const manifest = await read(join(next, 'manifest.json'))
   manifest.layers[1].layerId = 'repaint'
   manifest.layers[1].name = '改名'
@@ -169,7 +169,7 @@ test('rotated rest pixels survive rebind and concurrent draft edits both persist
 test('a single paper strip renders identically at rest and bends at 40 degrees in the CLI',async t=>{
   const dir=await mkdtemp(join(tmpdir(),'koma-rig-chain-'))
   t.after(()=>rm(dir,{recursive:true,force:true}))
-  await cp(join(root,'examples/chain-strip'),dir,{recursive:true})
+  await cp(join(root,'tests/fixtures/chain-strip'),dir,{recursive:true})
   await cli('edit',dir,join(dir,'setup.json'))
   const posed=await cli('preview',dir,join(dir,'bend.json'))
   assert.equal(posed.parts.length,1)

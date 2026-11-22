@@ -733,7 +733,7 @@ function switchWorkspace(next: 'studio' | 'live') {
   if (next === 'live') url.searchParams.set('view', 'live')
   else url.searchParams.delete('view')
   window.history.replaceState(null, '', url)
-  if (next === 'studio' && !project.value) void load(() => example('chain'), { updateUrl: false })
+  if (next === 'studio' && !project.value) void load(() => example('gbot'), { updateUrl: false })
 }
 function handleBackToStudio(snapshot: { bundle?: LiveWorkBundle; state: string }) {
   persistedLive.value = snapshot.bundle
@@ -755,7 +755,7 @@ function handleBackToStudio(snapshot: { bundle?: LiveWorkBundle; state: string }
     }
   }
   if (!project.value) {
-    void load(() => example('chain'), { updateUrl: false })
+    void load(() => example('gbot'), { updateUrl: false })
   }
 }
 async function handleLiveWorkChanged(info: { devPath?: string; clearResume?: boolean }) {
@@ -854,7 +854,7 @@ async function bootWorkspace() {
 
   // 3. Fallback to built-in sample
   if (workspace.value === 'studio') {
-    await load(() => example('chain'), { updateUrl: false })
+    await load(() => example('gbot'), { updateUrl: false })
   } else {
     liveBootReady.value = true
   }
@@ -938,7 +938,7 @@ onBeforeUnmount(() => {
             </template>
 
             <hr>
-            <button @click="load(()=>example('chain'))">整张纸带 · 骨链</button><button @click="load(()=>example('gbot'))">多图层练习</button><button @click="load(()=>example('paper'))">纸条 · 已绑定</button><button @click="load(()=>example('empty'))">纸条 · 空骨架</button>
+            <button @click="load(()=>example('gbot'))">GBot · 角色骨架</button>
           </nav>
         </div>
         <div class="history-controls"><button title="撤销 (⌘/Ctrl Z)" aria-label="撤销" :disabled="meshDraft ? traceOpen || !meshUndo.length : !before.length || mode==='pose'" @click="meshDraft?stepDraft(false):travel(true)"><Icon name="undo"/></button><button title="重做 (⌘/Ctrl Shift Z)" aria-label="重做" :disabled="meshDraft ? traceOpen || !meshRedo.length : !after.length || mode==='pose'" @click="meshDraft?stepDraft(true):travel(false)"><Icon name="redo"/></button></div>

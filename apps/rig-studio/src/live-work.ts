@@ -18,8 +18,7 @@ import {
   type ResolvedSourceLayout,
 } from './local-session'
 import { example, type Project } from './project'
-import gbotPerformanceCode from './samples/gbot/performance.js?raw'
-import chainPerformanceCode from '../../../examples/live-demo/motion/chain-live.js?raw'
+import gbotPerformanceCode from '../../../examples/gbot/motion/gbot-live.js?raw'
 
 export { resolveRelativePath }
 
@@ -52,38 +51,23 @@ function defaultScriptForProject(manifest: SliceManifest, rig: unknown): ScriptP
     ? new Set((rig as { bones: { boneId?: string }[] }).bones.map((b) => b.boneId))
     : new Set<string>()
   if (manifest.sourceId === 'gbot' && bones.has('hip') && bones.has('head')) {
-    return { code: gbotPerformanceCode, filename: 'gbot/performance.js' }
-  }
-  if (manifest.sourceId === 'chain-strip' && bones.has('base') && bones.has('tip')) {
-    return { code: chainPerformanceCode, filename: 'live-demo/chain-live.js' }
+    return { code: gbotPerformanceCode, filename: 'gbot/gbot-live.js' }
   }
   return undefined
 }
 
-export async function builtinLiveWork(which: 'gbot' | 'chain'): Promise<LiveWorkBundle> {
-  const project = await example(which)
+export async function builtinLiveWork(_which: 'gbot' = 'gbot'): Promise<LiveWorkBundle> {
+  const project = await example('gbot')
   const poster = project.files.get(project.manifest.reference)
-  if (which === 'gbot') {
-    return {
-      id: 'builtin-gbot-live',
-      title: 'GBot · 活体动帧',
-      rig: { manifest: project.manifest, rig: project.rig, files: project.files },
-      performanceCode: gbotPerformanceCode,
-      performanceFilename: 'gbot/performance.js',
-      poster,
-      viewport: { fit: 'contain', anchor: [0.5, 0.96], paddingPx: 24 },
-      defaultState: 'idle',
-    }
-  }
   return {
-    id: 'builtin-chain-live',
-    title: '整张纸带 · 骨链柔风',
+    id: 'builtin-gbot-live',
+    title: 'GBot · 活体动帧',
     rig: { manifest: project.manifest, rig: project.rig, files: project.files },
-    performanceCode: chainPerformanceCode,
-    performanceFilename: 'live-demo/chain-live.js',
+    performanceCode: gbotPerformanceCode,
+    performanceFilename: 'gbot/gbot-live.js',
     poster,
-    viewport: { fit: 'contain', anchor: [0.5, 0.5], paddingPx: 28 },
-    defaultState: 'breeze',
+    viewport: { fit: 'contain', anchor: [0.5, 0.96], paddingPx: 24 },
+    defaultState: 'idle',
   }
 }
 

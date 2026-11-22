@@ -1,8 +1,8 @@
 import {expect,it} from 'vitest'
 import {attachmentPoint,createPlayer,createRig,editRig,emptyRig,exportCapabilities,previewRig,sliceManifestSchema,transform,validateMotion,matchesPublishedCapabilities} from '../src/index'
-import source from '../../../examples/chain-strip/manifest.json'
-import setup from '../../../examples/chain-strip/setup.json'
-import old from '../../../examples/paper/rig.json'
+import source from '../../../tests/fixtures/chain-strip/manifest.json'
+import setup from '../../../tests/fixtures/chain-strip/setup.json'
+import old from '../../../tests/fixtures/paper/rig.json'
 const manifest=sliceManifestSchema.parse(source)
 const doc=editRig(manifest,emptyRig('chain-strip'),setup)
 const rig=createRig(manifest,doc)

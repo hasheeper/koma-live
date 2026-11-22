@@ -1,14 +1,14 @@
 {
   "format": "koma-rig.work.v1",
-  "id": "dkh-live",
-  "title": "DKH · 活立绘待机",
+  "id": "gbot-live",
+  "title": "GBot · 活体动帧",
   "rig": "./slices/",
-  "performance": "./motion/dkh-live.js",
+  "performance": "./motion/gbot-live.js",
   "poster": "./slices/reference.png",
   "viewport": {
     "fit": "contain",
-    "anchor": [0.5, 1.0],
-    "paddingPx": 16
+    "anchor": [0.5, 0.96],
+    "paddingPx": 24
   },
   "defaultState": "idle"
 }

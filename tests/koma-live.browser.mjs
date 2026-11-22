@@ -182,7 +182,7 @@ test('standalone player.js mountPerformance enforces all 4 contract guardrails a
 
     // Load portable koma-work.json with decoupled slices/ and motion/ subdirectories
     const live = await mountPerformance(host, {
-      work: `${origin}/examples/live-demo/koma-work.json`,
+      work: `${origin}/tests/fixtures/live-demo/koma-work.json`,
       autoplay: false,
       stepMs: 10,
       maxDpr: 2,
@@ -231,7 +231,7 @@ test('standalone player.js mountPerformance enforces all 4 contract guardrails a
     let guardrail1Message = ''
     try {
       await mountPerformance(host, {
-        rig: `${origin}/examples/live-demo/slices/`,
+        rig: `${origin}/tests/fixtures/live-demo/slices/`,
         performance: { code: `import { x } from './helper.js'\nexport default () => ({ update() {} })` },
       })
     } catch (e) {
@@ -241,7 +241,7 @@ test('standalone player.js mountPerformance enforces all 4 contract guardrails a
     // Guardrail 4a: errorPolicy 'pause' stops immediately and invokes onError exactly once (no 60fps storm)
     let pauseErrorCount = 0
     const badPause = await mountPerformance(host, {
-      rig: `${origin}/examples/live-demo/slices/`,
+      rig: `${origin}/tests/fixtures/live-demo/slices/`,
       performance: {
         code: `export default function (ctx) {
           return { update() { ctx.puppet.setPose({ bones: { tip: { rotation: 179 } } }) } }
@@ -257,7 +257,7 @@ test('standalone player.js mountPerformance enforces all 4 contract guardrails a
     // Guardrail 4b: errorPolicy 'throttle' deduplicates repeating errors within throttle window
     let throttleErrorCount = 0
     const badThrottle = await mountPerformance(host, {
-      rig: `${origin}/examples/live-demo/slices/`,
+      rig: `${origin}/tests/fixtures/live-demo/slices/`,
       performance: {
         code: `export default function (ctx) {
           return { update() { ctx.puppet.setPose({ bones: { tip: { rotation: 179 } } }) } }
@@ -312,7 +312,7 @@ test('inspect:live renders flexible composite boards, alpha channel, cross-viewp
   const summary = await runInspectLive(
     {
       format: 'koma-rig.inspect.v1',
-      source: { work: join(repoRoot, 'examples/live-demo/koma-work.json') },
+      source: { work: join(repoRoot, 'tests/fixtures/live-demo/koma-work.json') },
       outDir,
       exportTelemetry: true,
       exportFrames: true,
@@ -415,7 +415,7 @@ test('inspect:live renders flexible composite boards, alpha channel, cross-viewp
     process.execPath,
     [
       join(repoRoot, 'apps/rig-cli/inspect-live.mjs'),
-      join(repoRoot, 'examples/live-demo/koma-work.json'),
+      join(repoRoot, 'tests/fixtures/live-demo/koma-work.json'),
       '--trigger',
       'flick@120',
       '--times',
@@ -433,15 +433,15 @@ test('inspect:live renders flexible composite boards, alpha channel, cross-viewp
   assert.equal(cliSummary.boards.length, 1)
   assert.equal(cliSummary.captureChecks[0].allNonEmpty, true)
 
-  // Verify directory shorthand + setup.json in-memory fallback + GBot rigid-body invariants
+  // Verify directory shorthand + GBot rigid-body invariants
   // + same-timestamp state+pointer ordering + overlay compare + crop-safe X/Y guides & multi-arc legend
   const gbotOut = join(outDir, 'gbot-rigid-check')
   const gbotSummary = await runInspectLive(
     {
       format: 'koma-rig.inspect.v1',
       source: {
-        // Directory shorthand: auto-detects manifest.json + setup.json + performance.js
-        work: join(repoRoot, 'apps/rig-studio/src/samples/gbot'),
+        // Directory shorthand: auto-detects koma-work.json inside examples/gbot
+        work: join(repoRoot, 'examples/gbot'),
       },
       outDir: gbotOut,
       exportTelemetry: true,
@@ -538,7 +538,7 @@ test('inspect:live renders flexible composite boards, alpha channel, cross-viewp
 
   // Verify broken setup.json fails fast with explicit error instead of silent HTTP 404
   const badRigDir = join(outDir, 'bad-setup-dir')
-  await cp(join(repoRoot, 'examples/chain-strip'), badRigDir, { recursive: true })
+  await cp(join(repoRoot, 'tests/fixtures/chain-strip'), badRigDir, { recursive: true })
   await writeFile(join(badRigDir, 'setup.json'), JSON.stringify([{ op: 'bind', layerId: 'nonexistent', boneId: 'base' }]))
   await assert.rejects(
     runInspectLive(
@@ -558,7 +558,7 @@ test('inspect:live reports missing and unreadable slice textures to the caller',
   const temp = await mkdtemp(join(tmpdir(), 'koma-texture-errors-'))
   t.after(() => rm(temp, { recursive: true, force: true }))
   const rig = join(temp, 'rig')
-  await cp(join(repoRoot, 'examples/chain-strip'), rig, { recursive: true })
+  await cp(join(repoRoot, 'tests/fixtures/chain-strip'), rig, { recursive: true })
   const plan = {
     format: 'koma-rig.inspect.v1',
     source: { rig },
@@ -588,40 +588,40 @@ test('P0-1 dev workspace auto-loads ?work=, preserves context across Studio↔Li
   const listRes = await fetch(`${baseUrl}/__koma-workspace/list`)
   assert.equal(listRes.status, 200)
   const { works } = await listRes.json()
-  assert.ok(works.some(w => w.path === 'examples/live-demo' && w.kind === 'work'))
+  assert.ok(works.some(w => w.path === 'examples/gbot' && w.kind === 'work'))
 
   const browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader'] })
   t.after(() => browser.close())
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' })
 
-  // 1. Direct URL ?view=live&work=examples/live-demo loads immediately with auto-reload toggle active
-  await page.goto(`${baseUrl}/?view=live&work=examples/live-demo`)
+  // 1. Direct URL ?view=live&work=examples/gbot loads immediately with auto-reload toggle active
+  await page.goto(`${baseUrl}/?view=live&work=examples/gbot`)
   await page.locator('.koma-canvas-stack canvas').nth(2).waitFor()
   const titleInLive = await page.locator('.file-name').textContent()
-  assert.match(titleInLive ?? '', /骨链动帧/, `unexpected live title: ${titleInLive}`)
-  await page.getByRole('button', { name: 'gust', exact: true }).waitFor()
+  assert.match(titleInLive ?? '', /GBot/, `unexpected live title: ${titleInLive}`)
+  await page.getByRole('button', { name: 'happy', exact: true }).waitFor()
   const autoWatchBtn = page.getByRole('button', { name: '自动热重载' })
   await autoWatchBtn.waitFor()
   assert.equal(await autoWatchBtn.getAttribute('aria-pressed'), 'true')
-  await page.getByRole('button', { name: 'gust', exact: true }).click()
-  assert.equal(await page.getByRole('button', { name: 'gust', exact: true }).getAttribute('aria-pressed'), 'true')
+  await page.getByRole('button', { name: 'happy', exact: true }).click()
+  assert.equal(await page.getByRole('button', { name: 'happy', exact: true }).getAttribute('aria-pressed'), 'true')
 
   // 2. Switching to Studio automatically opens the same work's slices/ rig without manual folder picking
   await page.getByRole('button', { name: '切回绑骨 Studio' }).click()
   await page.locator('.pixi-surface canvas').waitFor()
-  await page.waitForFunction(() => document.querySelector('.file-name')?.textContent?.includes('骨链动帧'))
+  await page.waitForFunction(() => document.querySelector('.file-name')?.textContent?.includes('GBot'))
 
-  // 3. Switching back to Live preserves the active work & state ('gust')
+  // 3. Switching back to Live preserves the active work & state ('happy')
   await page.getByRole('button', { name: '切换到动帧 Live' }).click()
   await page.locator('.koma-canvas-stack canvas').nth(2).waitFor()
-  const gustAfterReturn = page.getByRole('button', { name: 'gust', exact: true })
-  await gustAfterReturn.waitFor()
-  assert.equal(await gustAfterReturn.getAttribute('aria-pressed'), 'true')
+  const happyAfterReturn = page.getByRole('button', { name: 'happy', exact: true })
+  await happyAfterReturn.waitFor()
+  assert.equal(await happyAfterReturn.getAttribute('aria-pressed'), 'true')
 
   // 4. Reloading plain root URL (without ?work=) restores the last opened dev session automatically
   await page.goto(`${baseUrl}/`)
   await page.locator('.pixi-surface canvas').waitFor()
-  await page.waitForFunction(() => document.querySelector('.file-name')?.textContent?.includes('骨链动帧'))
+  await page.waitForFunction(() => document.querySelector('.file-name')?.textContent?.includes('GBot'))
   assert.equal(await page.locator('.notice.problem').count(), 0)
 })
 

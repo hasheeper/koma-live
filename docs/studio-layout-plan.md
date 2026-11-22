@@ -37,4 +37,4 @@
 
 顶栏沿用 Koma Image 的 `BrandMark` 方块标识结构与 `30 px` 基准高度，「Koma」使用 Fredoka 650 / `23 px`，副标「RIG」使用 Fredoka 500 / `9.5 px` 共享基线。界面正文统一使用自托管的 Koma Rounded（资源圆体），坐标、角度、缩放与 ID 使用 JetBrains Mono。[品牌组件](../apps/rig-studio/src/BrandMark.vue) · [主题变量](../apps/rig-studio/src/theme.css)
 
-内置多图层角色示例 GBot 原画由 Andreas Esau 创作，分层素材来自 Godot 社区 Cutout Animation 资源（CC BY 3.0），经重新摆放切片与中文命名用于多部件遮挡、改绑与 TRS 试动验收。从本地打开 `apps/rig-studio/src/samples/gbot` 时，工作台从 `setup.json` 建骨，并在 Worker 中逐像素比对随样板提供的独立参考图。[GBot 参考图](../apps/rig-studio/src/samples/gbot/reference.png)
+内置多图层角色示例 GBot 原画由 Andreas Esau 创作，分层素材来自 Godot 社区 Cutout Animation 资源（CC BY 3.0），经重新摆放切片与中文命名用于多部件遮挡、改绑与 TRS 试动验收。从本地打开 `examples/gbot` 或 `examples/gbot/slices` 时，工作台载入骨架并在 Worker 中逐像素比对随样板提供的独立参考图。[GBot 参考图](../examples/gbot/slices/reference.png)

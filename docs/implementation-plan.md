@@ -38,13 +38,13 @@
 
 骨骼世界矩阵为 `W父 · T(b.x + tx, b.y + ty) · R(b.rotation + Δθ) · S(sx, sy)`，终点为 `W骨 · (length, 0)`。改变静止显示长度不会重新定位已有子骨。
 
-**绑定与改绑。** 全部在 Rest Pose 计算：`L偏移 = inverse(W新骨静止) · W图层静止`（保存为 6 分量 `restOffset` 与裁切原点 `bindOrigin`），以便换图扩边后按原画布坐标准确贴回。临时试动只进入预览，绝不污染静止偏移。[两段纸条操作](../examples/hinge/setup.json) · [矩阵与 TRS 回归](../packages/rig-core/test/authoring.test.ts) · [TRS 与驱动清单测试](../packages/rig-core/test/spec.test.ts)
+**绑定与改绑。** 全部在 Rest Pose 计算：`L偏移 = inverse(W新骨静止) · W图层静止`（保存为 6 分量 `restOffset` 与裁切原点 `bindOrigin`），以便换图扩边后按原画布坐标准确贴回。临时试动只进入预览，绝不污染静止偏移。[两段纸条夹具](../tests/fixtures/hinge/setup.json) · [矩阵与 TRS 回归](../packages/rig-core/test/authoring.test.ts) · [TRS 与驱动清单测试](../packages/rig-core/test/spec.test.ts)
 
 ### 2.1 一张完整切片跨骨链自动蒙皮
 
 同一张切片可绑给一条连续母子骨链 `boneChain: ["base", "tip", …]`（至少两根，逐项校验直接父子关系）。作者只需调节单一参数 `jointSoftnessPx`（关节两侧过渡半宽，默认最短投影段的四分之一，上限为相邻短段的一半）。
 
-内核在静止链上按弧长投影求权重，在关节带用 smoothstep 混合相邻骨骼的完整仿射变换并在关节附近自动细分三角形，保留原轮廓网格与纹理。无论是旋转、平移还是挤压拉伸，骨链都能平滑跟随，无需手工逐顶点刷权重。[单层纸带示例](../examples/chain-strip/setup.json) · [骨链回归](../packages/rig-core/test/chain.test.ts)
+内核在静止链上按弧长投影求权重，在关节带用 smoothstep 混合相邻骨骼的完整仿射变换并在关节附近自动细分三角形，保留原轮廓网格与纹理。无论是旋转、平移还是挤压拉伸，骨链都能平滑跟随，无需手工逐顶点刷权重。[单层纸带夹具](../tests/fixtures/chain-strip/setup.json) · [骨链回归](../packages/rig-core/test/chain.test.ts)
 
 ## 3. 轮廓网格、几何体检与可选局部变形
 
