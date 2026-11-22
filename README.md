@@ -27,6 +27,7 @@
 - **代码原生软体与骨骼全驱动**：向实时演出脚本完整开放骨骼 **TRS（平移 / 旋转 / 缩放）**、差分槽、ACGN **透发渲染（`peekOpacity` / `peekAfter`）** 与 **M4 代码原生顶点变形口（`deform` Mesh Field）**，兼顾刚体机械与发丝、水母伞、裙摆等软体流体动效。
 - **像 Spine / Live2D 一样解耦接入**：独立构建的零编辑器依赖运行时 `player.js` 配合 `rig export-work` 一键导出只读展示包；宿主网页或游戏仅通过 `mountPerformance` 发送语义状态与触发器，零侵入业务代码，支持原生静态图无痕降级。
 - **AI 协作与审片闭环**：自带单文件自包含演出契约（`koma-rig.performance.v1`）与 [Agent 演出技能](.agents/skills/koma-rig-animation/SKILL.md)，结合 `rig spec`、`rig check-bend` 与无头 Chromium 审片器 `inspect:live`，实现“绑骨 → 编写物理演出 → 多帧洋葱皮与轨迹验收”的自动化闭环。
+- **与 [Koma Image](https://github.com/hasheeper/koma-image) 无缝衔接**：上游可在 **[Koma Image](https://github.com/hasheeper/koma-image)**（[在线体验](https://koma-image.pages.dev/)）的 **EDIT → Koma Layer** 分层工坊中直接将静帧定稿自动拆层、局部补画并导出 `koma-rig.slices.v2` 切片包或分层 PSD，拖入 **Koma Rig / Koma Live** 即可开绑与实时演出。
 - **纯本地工作流**：无云端账号与业务后台，切片、骨架与脚本全部留在本地目录；工作台通过目录句柄与 IndexedDB 记忆最近打开项目，支持原位保存与外部编辑自动热重载。
 
 <a id="工作台"></a>
@@ -51,8 +52,9 @@
 - **实时热重载**：支持在本地目录中直接修改 `rig.json`、`koma-work.json` 或单文件演出脚本 `.js`，通过 Blob URL 自动同步热重载，免刷新即刻看效。
 - **同轴审查与卡片框实测**：一键开启只读审查叠加层（实时骨骼线、轮廓网格、逻辑坐标标尺与指针十字读数），切换「居中适屏／底边贴齐／竖卡 360×540／横卡 640×360」实测响应式零漂移；运行期异常自动按 `errorPolicy` 定格上一有效帧并支持一键复制诊断回喂给 AI。
 
-### 🔬 离线工具链 · PSD 切片与动帧验收
+### 🔬 离线工具链 · 上游分层、PSD 切片与动帧验收
 
+- **上游分层直连（[Koma Image · Koma Layer](https://github.com/hasheeper/koma-image/blob/main/docs/workspaces/layer.md)）**：若源稿为平面定稿，可先在兄弟项目 [Koma Image](https://github.com/hasheeper/koma-image)（[在线体验](https://koma-image.pages.dev/)）的 **Koma Layer** 中完成 AI 自动拆层、蓝橙局部补画与 Photopea 精修，直接导出本平台原生的 `koma-rig.slices.v2` 切片包或分层 PSD。
 - **PSD 去噪切图与像素复验（`tools/psd`）**：Python 离线脚本从分层 PSD 导出 `koma-rig.slices.v2` 切片包，支持 `--trim-stray` 剔除孤立雾噪、`--skip-hidden` 跳过隐藏参考层、`--bake-reference` 按 sRGB PMA 烘焙干净参考图，并通过 `rig verify-slices` 做逐像素 0 误差复验。
 - **骨架与网格 CLI 体检（`apps/rig-cli`）**：`rig spec` 导出驱动清单、`rig auto-mesh` 按 Alpha 轮廓批量生成安全轮廓网格、`rig check-bend` 扫描全部骨链的安全转角边界、`rig export-work` 一键纯净导出只读展示包。
 - **无头动帧审片器（`inspect:live`）**：用固定步确定性采样 `stepTo(timeMs)` 在真实 WebGL 中抓取多时刻条带、局部特写、洋葱皮、运动弧线与骨骼叠加拼图，便于人工与 AI 逐帧核验穿帮与物理传导。
@@ -226,6 +228,7 @@ uv run --locked --project tools/psd python -m unittest discover -s tools/psd/tes
 - **规格与工作台**：[功能规格](docs/implementation-plan.md) · [工作台说明](docs/studio-layout-plan.md) · [编辑器参考](docs/editor-references.md)
 - **演出与验收契约**：[演出契约](docs/performance-contract.md) · [动帧视觉验收](docs/live-inspection-plan.md) · [AI 演出技能](.agents/skills/koma-rig-animation/SKILL.md)
 - **离线制作与维护**：[离线制作与验收](docs/offline-authoring.md) · [分层拆分调研](docs/layer-decomposition-research.md) · [维护交接](docs/maintenance-handoff.md)
+- **兄弟项目**：[Koma Image](https://github.com/hasheeper/koma-image)（[在线体验](https://koma-image.pages.dev/) · 静帧生图与 EDIT 内 [Koma Layer](https://github.com/hasheeper/koma-image/blob/main/docs/workspaces/layer.md) 立绘拆层，上游直出 `koma-rig.slices.v2` 与分层 PSD）
 
 ## 💜 致谢
 
