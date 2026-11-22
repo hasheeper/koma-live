@@ -95,6 +95,8 @@ export const layerSetting = z.strictObject({
   layerId: id,
   locked: z.boolean().optional(),
   visible: z.boolean().optional(),
+  peekOpacity: z.number().min(0).max(1).optional(),
+  peekAfter: id.optional(),
 })
 const rigData = z.object({
   layerSettings: z.array(layerSetting).default([]),
@@ -111,6 +113,8 @@ export interface Part {
   pivot: Point
   visible: boolean
   opacity?: number
+  peekOpacity?: number
+  peekAfter?: string
   geometry?: Geometry
   mask?: Point[]
 }
@@ -144,9 +148,12 @@ export function createRig(manifest: SliceManifest, raw: unknown) {
   if (byId.size !== bindings.length) throw new Error('重复图层绑定')
   const layers = new Map(manifest.layers.map((l) => [l.layerId, l]))
   const settings = new Map(layerSettings.map((s) => [s.layerId, s]))
-  for (const s of layerSettings)
+  for (const s of layerSettings) {
     if (!layers.has(s.layerId) || settings.get(s.layerId) !== s)
       throw new Error('未知或重复的图层设置 ' + s.layerId)
+    if (s.peekAfter && !layers.has(s.peekAfter))
+      throw new Error('未知透发锚点图层 ' + s.peekAfter)
+  }
   let orderedLayers = manifest.layers
   if (drawOrder) {
     if (
@@ -374,15 +381,20 @@ export function createRig(manifest: SliceManifest, raw: unknown) {
         surface = surfaces.get(l.layerId)
       const [x, y, width, height] = l.rect
       const pivot = b?.pivot ?? [x + width / 2, y + height / 2]
+      const setting = settings.get(l.layerId)
       const result: Part = {
         layerId: l.layerId,
         pivot: transform(w, ...pivot),
         matrix: compose(w, [1, 0, 0, 1, x, y]),
         visible: b?.variant
           ? slots[b.variant.slot] === b.variant.state
-          : (settings.get(l.layerId)?.visible ?? l.visible),
+          : (setting?.visible ?? l.visible),
       }
       if (opacities.has(l.layerId)) result.opacity = opacities.get(l.layerId)!
+      if (setting?.peekOpacity && setting.peekOpacity > 0) {
+        result.peekOpacity = setting.peekOpacity
+        if (setting.peekAfter) result.peekAfter = setting.peekAfter
+      }
       if (!result.matrix.every(Number.isFinite) || !result.pivot.every(Number.isFinite))
         throw new Error(l.layerId + ' @ ' + timeMs + ' ms · 非有限世界变换')
       const fieldInput = deform?.[l.layerId]

@@ -147,6 +147,7 @@ def export_slices(
     gel_groups: Path | None = None,
     trim_stray: bool = False,
     bake_reference: bool = False,
+    skip_hidden: bool = False,
 ) -> dict:
     if blend_space not in ("srgb", "linear") or (gel_groups and blend_space != "srgb"):
         raise ValueError("同深度合成组使用 sRGB 直接预乘切片包")
@@ -182,11 +183,15 @@ def export_slices(
 
         tree = []
         group_ids = set()
+        skipped_hidden = []
 
         def visit(parent, groups, indices, parent_group_id=None):
             # psd-tools iterates in compositing order (back to front).
             for index, layer in enumerate(parent):
                 address = (*indices, str(index))
+                if skip_hidden and not layer.visible:
+                    skipped_hidden.append(dict(path="/".join(address), name=layer.name))
+                    continue
                 if layer.has_mask() or layer.has_vector_mask() or layer.has_effects() or layer.clipping:
                     raise ValueError(f"请先在美术侧烘焙蒙版、剪贴与效果：{layer.name}")
                 if layer.is_group():
@@ -293,6 +298,8 @@ def export_slices(
         groupCount=len(tree),
         bakedReference=bake_reference,
         trimStray=trim_stray,
+        skipHidden=skip_hidden,
+        skippedHidden=skipped_hidden,
         trimmedLayers=trimmed_layers,
         hazeWarnings=[item["layerId"] for item in trimmed_layers if item["hazeWarning"]],
     )
@@ -320,6 +327,11 @@ def main():
         action="store_true",
         help="按当前 blend-space 与清理后图层直接烘焙 reference.png 并执行 0 误差复验（无需提供外部参考图）",
     )
+    parser.add_argument(
+        "--skip-hidden",
+        action="store_true",
+        help="跳过 PSD 中隐藏的图层与组（如锁定原图、组内合并副本），不写入切片包",
+    )
     parser.add_argument("--report", type=Path, help="将导出与去噪体检报告写入指定 JSON 文件")
     args = parser.parse_args()
     try:
@@ -344,6 +356,7 @@ def main():
             args.blend_space,
             args.gel_groups,
             trim_stray=args.trim_stray,
+            skip_hidden=args.skip_hidden,
             bake_reference=args.bake_reference,
         )
         if args.report:

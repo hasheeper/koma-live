@@ -49,6 +49,7 @@ export async function mountCharacter(
       drawObject: Sprite | Mesh<MeshGeometry>
       opacity: number
       erase?: Mesh<MeshGeometry>
+      peek?: Mesh<MeshGeometry>
       clip?: Graphics
       topology?: number[]
     }
@@ -146,6 +147,7 @@ export async function mountCharacter(
     throw error
   }
   function update(pose: Pose) {
+    const order = new Map(pose.parts.map((p, i) => [p.layerId, i]))
     for (const [index, p] of pose.parts.entries()) {
       const r = records.get(p.layerId)
       if (!r) throw new Error('未知渲染部件 ' + p.layerId)
@@ -187,8 +189,24 @@ export async function mountCharacter(
       } else if (r.clip) {
         r.mesh.mask = null
         if (r.erase) r.erase.mask = null
+        if (r.peek) r.peek.mask = null
         r.clip.destroy()
         r.clip = undefined
+      }
+      // Optional ACGN translucent peek-through pass (shares live geometry + texture)
+      if (p.peekOpacity && p.peekOpacity > 0) {
+        if (!r.peek) {
+          r.peek = new Mesh({ geometry: r.mesh.geometry, texture: r.mesh.texture })
+          flat.addChild(r.peek)
+        }
+        const anchorIndex = p.peekAfter !== undefined ? order.get(p.peekAfter) : undefined
+        r.peek.zIndex = (anchorIndex !== undefined ? anchorIndex + 0.5 : pose.parts.length) + index * 1e-4
+        r.peek.setFromMatrix(matrix)
+        r.peek.visible = p.visible
+        r.peek.alpha = r.opacity * (p.opacity ?? 1) * p.peekOpacity
+        if (r.clip) r.peek.mask = r.clip
+      } else if (r.peek) {
+        r.peek.visible = false
       }
     }
     for (const pass of passes)

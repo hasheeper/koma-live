@@ -143,3 +143,29 @@ class SliceRoundTrip(unittest.TestCase):
 
             with self.assertRaises(ValueError):
                 export_slices(root / "haze.psd", None, root / "missing-ref", "haze-demo", {}, bake_reference=False)
+
+    def test_skip_hidden_drops_locked_original_and_merged_copies(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            doc = PSDImage.new("RGBA", (8, 8))
+            locked = doc.create_pixel_layer(Image.new("RGBA", (8, 8), "black"), name="locked")
+            merged = doc.create_pixel_layer(Image.new("RGBA", (4, 4), "blue"), name="merged")
+            part = doc.create_pixel_layer(Image.new("RGBA", (4, 4), "red"), name="part")
+            group = doc.create_group([merged, part], name="body")
+            for layer, native in [(locked, 30), (merged, 31), (part, 32), (group, 33)]:
+                layer.tagged_blocks.set_data(Tag.LAYER_ID, native)
+            locked.visible = False
+            merged.visible = False
+            doc.save(root / "hidden.psd")
+
+            report = export_slices(
+                root / "hidden.psd", None, root / "out", "hidden-demo", {}, bake_reference=True, skip_hidden=True
+            )
+            manifest = json.loads((root / "out/manifest.json").read_text())
+            self.assertEqual([layer["layerId"] for layer in manifest["layers"]], ["psd-32"])
+            self.assertEqual([item["name"] for item in report["skippedHidden"]], ["locked", "merged"])
+            self.assertEqual(report["proof"]["mismatches"], 0)
+
+            full = export_slices(root / "hidden.psd", None, root / "full", "hidden-demo", {}, bake_reference=True)
+            self.assertEqual(full["layerCount"], 3)
+            self.assertEqual(full["skippedHidden"], [])

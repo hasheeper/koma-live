@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 const props = withDefaults(defineProps<{ subtitle?: string }>(), { subtitle: 'RIG' })
-const glyph = import.meta.env.BASE_URL + 'mark.svg#koma-tiles'
+const glyph = computed(() => import.meta.env.BASE_URL + (props.subtitle === 'LIVE' ? 'mark.svg#koma-live' : 'mark.svg#koma-rig'))
 </script>
 
 <template>

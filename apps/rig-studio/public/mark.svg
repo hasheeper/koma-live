@@ -4,19 +4,24 @@
       <stop stop-color="#172554"/>
       <stop offset=".72" stop-color="#151921"/>
     </radialGradient>
-    <symbol id="koma-tiles" viewBox="0 0 24 24">
-      <rect x="3" y="3" width="3" height="3" rx="1.1" style="opacity:var(--mark-faint,.24)" />
-      <rect x="9.8" y="2.3" width="4.4" height="4.4" rx="1.1" style="opacity:var(--mark-mid,.5)" />
-      <rect x="16.5" y="1.5" width="6" height="6" rx="1.7" />
-      <rect x="2.3" y="9.8" width="4.4" height="4.4" rx="1.1" style="opacity:var(--mark-mid,.5)" />
-      <rect x="9" y="9" width="6" height="6" rx="1.7" />
-      <rect x="17.3" y="9.8" width="4.4" height="4.4" rx="1.1" style="opacity:var(--mark-mid,.5)" />
-      <rect x="1.5" y="16.5" width="6" height="6" rx="1.7" />
-      <rect x="9.8" y="17.3" width="4.4" height="4.4" rx="1.1" style="opacity:var(--mark-mid,.5)" />
-      <rect x="18" y="18" width="3" height="3" rx="1.1" style="opacity:var(--mark-faint,.24)" />
+    <!-- Koma Live: cinema cadence time-slices accelerating into a living portrait frame -->
+    <symbol id="koma-live" viewBox="0 0 24 24">
+      <rect x="1.8" y="6.8" width="2.0" height="10.4" rx="1.0" style="opacity:var(--mark-faint,.24)" />
+      <rect x="5.1" y="5.4" width="2.5" height="13.2" rx="1.25" style="opacity:var(--mark-mid,.48)" />
+      <rect x="8.9" y="4.3" width="3.0" height="15.4" rx="1.5" style="opacity:calc(var(--mark-mid,.48) + .24)" />
+      <rect x="13.2" y="3.2" width="9.0" height="17.6" rx="2.7" />
+    </symbol>
+    <!-- Koma Rig: sibling articulated cadence with split segments around a central hinge joint -->
+    <symbol id="koma-rig" viewBox="0 0 24 24">
+      <rect x="1.8" y="6.8" width="2.0" height="10.4" rx="1.0" style="opacity:var(--mark-faint,.22)" />
+      <rect x="5.1" y="5.4" width="2.5" height="13.2" rx="1.25" style="opacity:var(--mark-mid,.44)" />
+      <rect x="8.9" y="4.3" width="3.0" height="15.4" rx="1.5" style="opacity:calc(var(--mark-mid,.44) + .22)" />
+      <rect x="13.2" y="3.2" width="8.6" height="6.5" rx="2.3" opacity="0.92" />
+      <circle cx="17.5" cy="12.0" r="1.85" />
+      <rect x="13.7" y="14.4" width="8.5" height="6.4" rx="2.3" opacity="0.92" />
     </symbol>
   </defs>
   <rect width="32" height="32" rx="8.6" fill="url(#plate)"/>
-  <rect x=".5" y=".5" width="31" height="31" rx="8.1" fill="none" stroke="#7dd3fc" stroke-opacity=".2"/>
-  <use href="#koma-tiles" x="4.16" y="4.16" width="23.68" height="23.68" fill="#7dd3fc"/>
+  <rect x=".5" y=".5" width="31" height="31" rx="8.1" fill="none" stroke="#7dd3fc" stroke-opacity=".22"/>
+  <use href="#koma-live" x="4.16" y="4.16" width="23.68" height="23.68" fill="#7dd3fc"/>
 </svg>

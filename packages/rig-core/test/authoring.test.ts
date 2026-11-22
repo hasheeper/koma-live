@@ -170,3 +170,18 @@ it('keeps author locks distinct from visibility and inherited motion', () => {
     ]).bindings[0]!.boneId,
   ).toBeUndefined()
 })
+
+it('supports translucent peekOpacity / peekAfter layer settings and rejects unknown anchors', () => {
+  const edited = editRig(manifest, doc, [
+    { op: 'set-layer', layerId: 'psd-2', peekOpacity: 0.55, peekAfter: 'psd-4' },
+  ])
+  const pose = createRig(manifest, edited).pose()
+  const p2 = pose.parts.find((p) => p.layerId === 'psd-2')!
+  expect(p2.peekOpacity).toBe(0.55)
+  expect(p2.peekAfter).toBe('psd-4')
+  const cleared = editRig(manifest, edited, [{ op: 'set-layer', layerId: 'psd-2', peekOpacity: 0 }])
+  expect(createRig(manifest, cleared).pose().parts.find((p) => p.layerId === 'psd-2')!.peekOpacity).toBeUndefined()
+  expect(() =>
+    editRig(manifest, doc, [{ op: 'set-layer', layerId: 'psd-2', peekOpacity: 0.5, peekAfter: 'missing' }]),
+  ).toThrow('未知透发锚点图层')
+})

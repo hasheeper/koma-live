@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 import { assetCommand } from './assets.mjs'
+import { parseExportWorkArgs, runExportWork } from './export-work.mjs'
 import { parseAutoMeshArgs, parseCheckBendArgs, runAutoMesh, runCheckBend } from './mesh-tools.mjs'
 import { workspace, writeJson } from './workspace.mjs'
 import { auditMotions, capabilitiesJsonSchema, createPlayer, createRig, editRig, emptyRig, exportCapabilities, exportRigSpec, sliceManifestSchema, validateMotion } from '@koma-rig/rig-core'
@@ -14,6 +15,10 @@ async function main() {
   }
   if (command === 'check-bend') {
     console.log(JSON.stringify(await runCheckBend(parseCheckBendArgs(process.argv.slice(3))), null, 2))
+    return
+  }
+  if (command === 'export-work') {
+    console.log(JSON.stringify(await runExportWork(parseExportWorkArgs(process.argv.slice(3))), null, 2))
     return
   }
   if (['import','render','verify-slices','reimport','review','publish'].includes(command)) {
