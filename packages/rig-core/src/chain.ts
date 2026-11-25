@@ -117,7 +117,7 @@ export function prepareChain(ids:string[], softness:number|undefined, bones:Map<
       },
     }
   }
-  function skinFor(custom: Geometry) {
+  function skinFor(custom: Geometry, vectorsOnly = false) {
     const customWeights: Influence[] = []
     for (let i = 0; i < custom.vertices.length; i += 2) {
       customWeights.push(influence(custom.vertices[i]!, custom.vertices[i + 1]!))
@@ -126,6 +126,8 @@ export function prepareChain(ids:string[], softness:number|undefined, bones:Map<
       const matrices = ids.map((id, i) => compose(frames.get(id)!.matrix, inverseBinds[i]!))
       const toLocal = inverse(matrices[0]!)
       const deltas = matrices.map((m) => compose(toLocal, m))
+      // A displacement inherits rotation and scale. Its origin already follows the posed surface.
+      if (vectorsOnly) for (const m of deltas) { m[4] = 0; m[5] = 0 }
       const vertices = new Array<number>(local.vertices.length)
       for (let i = 0; i < customWeights.length; i++) {
         const { left, right, weight } = customWeights[i]!

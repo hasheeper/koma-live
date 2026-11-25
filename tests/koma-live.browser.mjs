@@ -247,6 +247,7 @@ test('standalone player.js mountPerformance enforces all 4 contract guardrails a
           return { update() { ctx.puppet.setPose({ bones: { tip: { rotation: 179 } } }) } }
         }`,
       },
+      validateGeometry: true,
       errorPolicy: 'pause',
       onError: () => { pauseErrorCount++ },
     })
@@ -263,6 +264,7 @@ test('standalone player.js mountPerformance enforces all 4 contract guardrails a
           return { update() { ctx.puppet.setPose({ bones: { tip: { rotation: 179 } } }) } }
         }`,
       },
+      validateGeometry: true,
       errorPolicy: 'throttle',
       errorThrottleMs: 1000,
       onError: () => { throttleErrorCount++ },
@@ -737,6 +739,21 @@ test('M4 Mesh Field deforms normal + gelGroups layers in WebGL and cleanly resto
     // Subsequent frame omits deform -> must cleanly restore exact rest pixels with 0 residue
     puppet.setPose({})
     const pxRestored = snapshotCanvas(puppet.canvas)
+
+    // 1b. Test runtime opacity + tint + validateGeometry toggle on mountLiveRig
+    const defaultValidate = puppet.validateGeometry
+    puppet.setPose({ opacity: { ribbon: 0.35 }, tint: { ribbon: 0x6080ff } })
+    const pxStyled = snapshotCanvas(puppet.canvas)
+    puppet.setPose({})
+    const pxAfterStyleReset = snapshotCanvas(puppet.canvas)
+
+    // Default validateGeometry=false skips checkGeometry on extreme fold; toggling true catches GeometryError
+    const foldField = { ribbon: { grid: [4, 4], field: (u) => [(0.5 - u) * 260, 0] } }
+    let threwWhenDisabled = false
+    try { puppet.setPose({ deform: foldField }) } catch { threwWhenDisabled = true }
+    puppet.setValidateGeometry(true)
+    let threwWhenEnabled = false
+    try { puppet.setPose({ deform: foldField }) } catch { threwWhenEnabled = true }
     puppet.destroy()
 
     // 2. Test mountPerformance deterministic stepTo(t) with Mesh Field inside single-file script
@@ -777,6 +794,11 @@ test('M4 Mesh Field deforms normal + gelGroups layers in WebGL and cleanly resto
     return {
       deformedDiffCount: diffPixels(pxRest, pxDeformed),
       restoredDiffCount: diffPixels(pxRest, pxRestored),
+      styledDiffCount: diffPixels(pxRest, pxStyled),
+      afterStyleResetDiffCount: diffPixels(pxRest, pxAfterStyleReset),
+      defaultValidate,
+      threwWhenDisabled,
+      threwWhenEnabled,
       deterministicMatch: JSON.stringify(vertsA) === JSON.stringify(vertsB),
       ribbonVertexCount: vertsA.length / 2,
     }
@@ -784,6 +806,272 @@ test('M4 Mesh Field deforms normal + gelGroups layers in WebGL and cleanly resto
 
   assert.ok(result.deformedDiffCount > 500, 'Mesh Field must visibly deform normal + gelGroups WebGL pixels')
   assert.equal(result.restoredDiffCount, 0, 'Omitting deform on next frame must restore exact rest pixels (0 mismatch)')
+  assert.ok(result.styledDiffCount > 200, 'Runtime opacity + tint must visibly change rendered WebGL pixels')
+  assert.equal(result.afterStyleResetDiffCount, 0, 'Omitting opacity/tint must restore exact rest pixels (0 mismatch)')
+  assert.equal(result.defaultValidate, false, 'mountLiveRig defaults validateGeometry to false for fast production playback')
+  assert.equal(result.threwWhenDisabled, false, 'validateGeometry=false skips checkGeometry')
+  assert.equal(result.threwWhenEnabled, true, 'setValidateGeometry(true) enables live GeometryError detection')
   assert.equal(result.deterministicMatch, true, 'Mesh Field under mountPerformance stepTo(t) must be 100% deterministic')
   assert.equal(result.ribbonVertexCount, 36, '3x8 grid produces (3+1)*(8+1) = 36 vertices')
+})
+
+test('WebGL clipTo Alpha masking, textureScale 0.5, and 2D layerResolutionScale 0.5 work end-to-end', async (t) => {
+  const server = await startStaticServer(repoRoot)
+  t.after(() => server.close())
+  const baseUrl = `http://127.0.0.1:${server.address().port}`
+
+  const browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader'] })
+  t.after(() => browser.close())
+  const page = await browser.newPage({ viewport: { width: 640, height: 480 }, deviceScaleFactor: 2 })
+  await page.goto(`${baseUrl}/host.html`)
+
+  const manifest1x = sliceManifestSchema.parse({
+    format: 'koma-rig.slices.v2',
+    blendSpace: 'srgb',
+    sourceId: 'clip_test',
+    canvas: { width: 160, height: 160 },
+    reference: 'reference.png',
+    layers: [
+      { layerId: 'eye_white', name: '眼白', groups: [], texture: 'textures/eye_white.png', rect: [40, 40, 80, 80], visible: true, opacity: 1 },
+      { layerId: 'pupil', name: '瞳孔', groups: [], texture: 'textures/pupil.png', rect: [10, 60, 140, 40], visible: true, opacity: 1 },
+    ],
+  })
+  const rig = editRig(manifest1x, emptyRig('clip_test'), [
+    { op: 'add-bone', boneId: 'root', name: '根骨', start: [80, 80], end: [80, 120] },
+    { op: 'bind', layerId: 'eye_white', boneId: 'root' },
+    { op: 'bind', layerId: 'pupil', boneId: 'root' },
+    { op: 'set-layer', layerId: 'pupil', clipTo: 'eye_white' },
+  ])
+
+  const result = await page.evaluate(async ({ origin, manifest1x, rig }) => {
+    const { mountLiveRig, mountPerformance } = await import(`${origin}/packages/rig-renderer/dist/runtime/player.js`)
+    const host = document.createElement('div')
+    host.style.cssText = 'position:relative;width:400px;height:400px;'
+    document.body.appendChild(host)
+
+    async function makeBlob(w, h, draw) {
+      const c = document.createElement('canvas')
+      c.width = w
+      c.height = h
+      draw(c.getContext('2d'))
+      return await new Promise((res) => c.toBlob(res, 'image/png'))
+    }
+
+    const drawWhite = (ctx, w, h) => {
+      ctx.fillStyle = '#ffffff'
+      ctx.beginPath()
+      ctx.arc(w / 2, h / 2, w * 0.4, 0, Math.PI * 2)
+      ctx.fill()
+    }
+    const drawPupil = (ctx, w, h) => {
+      ctx.fillStyle = '#e11d48'
+      ctx.fillRect(0, 0, w, h)
+    }
+
+    const files1x = new Map([
+      ['textures/eye_white.png', await makeBlob(80, 80, (c) => drawWhite(c, 80, 80))],
+      ['textures/pupil.png', await makeBlob(140, 40, (c) => drawPupil(c, 140, 40))],
+    ])
+
+    function samplePixel(canvas, x, y) {
+      const c = document.createElement('canvas')
+      c.width = canvas.width
+      c.height = canvas.height
+      const ctx = c.getContext('2d')
+      ctx.drawImage(canvas, 0, 0)
+      return Array.from(ctx.getImageData(x, y, 1, 1).data)
+    }
+
+    // 1. Test static clipTo: pixel at (20, 80) is inside pupil rect [10..150, 60..100] but OUTSIDE eye_white circle -> must be transparent!
+    // Pixel at (80, 80) is INSIDE both -> must be red!
+    const puppet = await mountLiveRig(host, { manifest: manifest1x, rig, files: files1x })
+    const pxOutsideClipped = samplePixel(puppet.canvas, 20, 80)
+    const pxInsideClipped = samplePixel(puppet.canvas, 80, 80)
+
+    // Clear clipTo dynamically -> pixel at (20, 80) becomes red!
+    puppet.setPose({ clipTo: { pupil: null } })
+    const pxOutsideUnclipped = samplePixel(puppet.canvas, 20, 80)
+    puppet.destroy()
+
+    // 2. Test textureScale: 0.5 + layerResolutionScale: 0.5 on mountPerformance (zero rig/script changes!)
+    const manifestHalf = { ...manifest1x, textureScale: 0.5 }
+    const filesHalf = new Map([
+      ['textures/eye_white.png', await makeBlob(40, 40, (c) => drawWhite(c, 40, 40))],
+      ['textures/pupil.png', await makeBlob(70, 20, (c) => drawPupil(c, 70, 20))],
+    ])
+    const hostHalf = document.createElement('div')
+    hostHalf.style.cssText = 'position:relative;width:160px;height:160px;'
+    document.body.appendChild(hostHalf)
+    const liveHalf = await mountPerformance(hostHalf, {
+      rig: { manifest: manifestHalf, rig, files: filesHalf },
+      autoplay: false,
+      maxDpr: 2,
+      layerResolutionScale: 0.5,
+      performance: {
+        meta: { format: 'koma-rig.performance.v1', title: 'Half-Res Test', layers: { back: '2d' } },
+        default: ({ puppet: p, back }) => ({
+          update({ timeMs }) {
+            p.setPose({
+              timeMs,
+              deform: { pupil: { grid: [4, 2], field: () => [2, 0] } },
+            })
+            if (back?.ctx2d) {
+              back.ctx2d.clearRect(0, 0, 160, 160)
+              back.ctx2d.fillStyle = '#00ff00'
+              back.ctx2d.fillRect(0, 0, 160, 160)
+            }
+          },
+        }),
+      },
+    })
+    liveHalf.stepTo(50)
+    // Also test resetting deform on textureScale: 0.5 (ensures logical rect width/height are restored, not half texture dims!)
+    liveHalf.puppet.setPose({})
+    const halfPuppetCanvasW = liveHalf.puppet.canvas.width
+    const halfCenterPx = samplePixel(liveHalf.puppet.canvas, 40, 40) // 80 * 0.5 = 40
+    const halfOutsidePx = samplePixel(liveHalf.puppet.canvas, 10, 40) // 20 * 0.5 = 10 (clipped!)
+    const backCanvas = hostHalf.querySelectorAll('canvas')[0]
+    const backWidthHalf = backCanvas.width
+    liveHalf.destroy()
+
+    return {
+      pxOutsideClipped,
+      pxInsideClipped,
+      pxOutsideUnclipped,
+      halfPuppetCanvasW,
+      halfCenterPx,
+      halfOutsidePx,
+      backWidthHalf,
+    }
+  }, { origin: baseUrl, manifest1x, rig })
+
+  assert.equal(result.pxOutsideClipped[3], 0, 'clipTo must completely mask pixels outside target Alpha silhouette')
+  assert.ok(result.pxInsideClipped[0] > 180 && result.pxInsideClipped[3] > 240, 'clipTo keeps interior pupil pixels vivid')
+  assert.ok(result.pxOutsideUnclipped[0] > 180 && result.pxOutsideUnclipped[3] > 240, 'clipTo: null cleanly restores unclipped pixels')
+  assert.equal(result.halfPuppetCanvasW, 80, 'textureScale: 0.5 halves WebGL backing canvas (160 -> 80)')
+  assert.ok(result.halfCenterPx[0] > 180 && result.halfCenterPx[3] > 240, 'textureScale: 0.5 renders logical coordinates cleanly')
+  assert.equal(result.halfOutsidePx[3], 0, 'clipTo works seamlessly under textureScale: 0.5')
+  assert.equal(result.backWidthHalf, 160, 'layerResolutionScale: 0.5 halves 2x Retina 2D backing width (320 -> 160)')
+})
+
+test('automatic clipped cast shadows darken receiver uniformly without double-darkening or bleed', async (t) => {
+  const server = await startStaticServer(repoRoot)
+  t.after(() => server.close())
+  const baseUrl = `http://127.0.0.1:${server.address().port}`
+
+  const browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader'] })
+  t.after(() => browser.close())
+  const page = await browser.newPage({ viewport: { width: 640, height: 480 } })
+  await page.goto(`${baseUrl}/host.html`)
+
+  const manifest = {
+    format: 'koma-rig.slices.v2',
+    sourceId: 'shadow-live-test',
+    canvas: { width: 160, height: 160 },
+    reference: 'reference.png',
+    blendSpace: 'srgb',
+    layers: [
+      { layerId: 'face', name: 'Face', groups: [], texture: 'textures/face.png', rect: [40, 40, 80, 80], visible: true, opacity: 1 },
+      { layerId: 'bang_a', name: 'Bang A', groups: [], texture: 'textures/bang_a.png', rect: [20, 40, 70, 30], visible: true, opacity: 1 },
+      { layerId: 'bang_b', name: 'Bang B', groups: [], texture: 'textures/bang_b.png', rect: [70, 40, 70, 30], visible: true, opacity: 1 },
+    ],
+  }
+  const rig = {
+    rigId: 'shadow-live-test',
+    rigVersion: 1,
+    semantics: { parameters: [{ id: 'yaw', meaning: 'yaw', unit: '', min: 0, max: 1, default: 0 }], slots: [] },
+    morphs: [['face', 20], ['bang_a', 25]].map(([layerId, dx]) => ({
+      layerId, grid: [1, 1], axes: [{ parameter: 'yaw', samples: [0, 1] }],
+      deltas: [null, [dx, 0, dx, 0, dx, 0, dx, 0]],
+    })),
+    bones: [],
+    bindings: [],
+    castShadows: [
+      {
+        casters: ['bang_a', 'bang_b'],
+        receivers: ['face'],
+        offset: [0, 30],
+        color: 0x000000,
+        opacity: 0.4,
+        blur: 0,
+        blendMode: 'multiply',
+      },
+    ],
+  }
+
+  const res = await page.evaluate(async ({ origin, manifest, rig }) => {
+    const { mountLiveRig } = await import(`${origin}/packages/rig-renderer/dist/runtime/player.js`)
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+
+    async function solidBlob(w, h, fill) {
+      const c = document.createElement('canvas')
+      c.width = w
+      c.height = h
+      const ctx = c.getContext('2d')
+      ctx.fillStyle = fill
+      ctx.fillRect(0, 0, w, h)
+      return await new Promise((r) => c.toBlob(r, 'image/png'))
+    }
+    const files = new Map([
+      ['textures/face.png', await solidBlob(80, 80, '#ffffff')],
+      ['textures/bang_a.png', await solidBlob(70, 30, '#e0e8f0')],
+      ['textures/bang_b.png', await solidBlob(70, 30, '#303848')],
+    ])
+    function samplePixel(canvas, x, y) {
+      const c = document.createElement('canvas')
+      c.width = canvas.width
+      c.height = canvas.height
+      const ctx = c.getContext('2d')
+      ctx.drawImage(canvas, 0, 0)
+      return Array.from(ctx.getImageData(x, y, 1, 1).data)
+    }
+
+    const puppet = await mountLiveRig(host, { manifest, rig, files })
+    // Unshadowed face area at (80, 112): pure white (255,255,255,255)
+    const restImage = puppet.canvas.toDataURL()
+    const unshadowed = samplePixel(puppet.canvas, 80, 112)
+    // Single-caster shadow area at (55, 85) (only bang_a shifted y=70..100, inside face x=40..120)
+    const singleShadow = samplePixel(puppet.canvas, 55, 85)
+    // Overlapping dual-caster shadow area at (80, 85) (BOTH bang_a [20..90] and bang_b [70..140] overlap!)
+    const overlapShadow = samplePixel(puppet.canvas, 80, 85)
+    // Outside face at (28, 85) where shifted bang_a [20..90, 70..100] extends OUTSIDE face [40..120]: must be alpha=0!
+    const outsideFace = samplePixel(puppet.canvas, 28, 85)
+
+    // Test blurred multi-color shadow & clearing shadows dynamically
+    puppet.setPose({
+      shadows: [
+        { casters: ['bang_a', 'bang_b'], receivers: ['face'], offset: [0, 30], color: 0x8c5068, opacity: 0.35, blur: 4, blendMode: 'multiply' },
+      ],
+    })
+    const softShadow = samplePixel(puppet.canvas, 80, 85)
+    const softOutside = samplePixel(puppet.canvas, 28, 85)
+
+    puppet.setPose({ shadows: [] })
+    const clearedShadow = samplePixel(puppet.canvas, 80, 85)
+    puppet.setPose({ opacity: { bang_b: 0 } })
+    const beforeCast = samplePixel(puppet.canvas, 107, 85)
+    puppet.setPose({ parameters: { yaw: 1 }, opacity: { bang_b: 0 }, clipTo: { bang_a: 'face' } })
+    const movedCast = samplePixel(puppet.canvas, 107, 85)
+    const movedClip = samplePixel(puppet.canvas, 52, 55)
+    const materialPoint = puppet.projectRestPoint('face', [70, 70])
+    puppet.reset()
+    const exactRest = puppet.canvas.toDataURL() === restImage
+    puppet.destroy()
+
+    return { unshadowed, singleShadow, overlapShadow, outsideFace, softShadow, softOutside, clearedShadow,
+      beforeCast, movedCast, movedClip, materialPoint, exactRest }
+  }, { origin: baseUrl, manifest, rig })
+
+  assert.ok(res.unshadowed[0] >= 250 && res.unshadowed[3] >= 250, `unshadowed face should stay white, got ${res.unshadowed}`)
+  assert.ok(res.singleShadow[0] >= 135 && res.singleShadow[0] <= 170, `single caster 40% multiply shadow should be ~153, got ${res.singleShadow}`)
+  assert.ok(Math.abs(res.overlapShadow[0] - res.singleShadow[0]) <= 3, `overlapping casters must NOT double-darken (${res.singleShadow[0]} vs ${res.overlapShadow[0]})`)
+  assert.equal(res.outsideFace[3], 0, `cast shadow must never bleed outside receiver alpha, got ${res.outsideFace}`)
+  assert.ok(res.softShadow[0] > res.softShadow[1] && res.softShadow[0] < 245, `warm rose blurred shadow should tint cleanly, got ${res.softShadow}`)
+  assert.equal(res.softOutside[3], 0, `blurred shadow must stay clipped inside receiver alpha, got ${res.softOutside}`)
+  assert.ok(res.clearedShadow[0] >= 250, `shadows: [] must clear static castShadows, got ${res.clearedShadow}`)
+  assert.ok(res.beforeCast[0] >= 250 && res.movedCast[0] < 180)
+  assert.equal(res.movedClip[3], 0)
+  assert.deepEqual(res.materialPoint, [90, 70])
+  assert.equal(res.exactRest, true)
 })

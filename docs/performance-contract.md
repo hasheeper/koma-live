@@ -3,7 +3,7 @@
 > **状态**：M1–M4 已落地并通过单元测试与浏览器端到端回归（`npm test`、`npm run test:live`）。  
 > **品牌脉络**：以 **「动帧（Koma）」** 为核心统一整个产品家族——**Koma Image**（静帧）· **Koma Live**（动帧主平台，内置 **Koma Rig** 绑骨底盘）。底层稳定协议保持 `koma-rig.*.v1/v2` 与 `koma-work.json` 向后兼容，运行时入口采用与页面形态解耦的 **`mountPerformance`** 与 **`mountLiveRig`**。
 
-本文定义 Koma Rig 体系的最后一块拼图：**应用承载契约（Performance & Work Contract）** 与 **Koma Live 动帧展示 / 作品工坊**。目标是让任意目录结构下的角色切片与 AI 代码美术演出脚本，都能以 **100% 一致、零坐标系漂移、零硬编码** 的方式同时运行在 **Koma Live** 和 **真实网页 / 游戏作品** 中。[功能规格](implementation-plan.md) · [工作台说明](studio-layout-plan.md) · [AI 演出技能](../.agents/skills/koma-rig-animation/SKILL.md)
+本文定义 Koma Rig 体系的应用承载层：**演出与作品契约（Performance & Work Contract）** 与 **Koma Live 动帧展示 / 作品工坊**。目标是让任意目录结构下的角色切片与 AI 代码美术演出脚本，都能以 **100% 一致、零坐标系漂移、零硬编码** 的方式同时运行在 **Koma Live** 和 **真实网页 / 游戏作品** 中。[设计哲学与演进](design-philosophy.md) · [核心规格](rig-spec.md) · [工作台说明](studio-guide.md) · [AI 演出技能](../.agents/skills/koma-rig-animation/SKILL.md)
 
 ---
 
@@ -315,46 +315,13 @@ live.setState('happy')
 
 ---
 
-## 4. 分阶段实施路线与演进边界
+## 4. 代码原生顶点变形口（Mesh Field）与演进边界
 
-整个落地拆成 4 个可独立验证的小阶段，每个阶段都守住现有依赖边界与测试护栏：
-
-### 阶段 M1：契约 Schema 与 `mountPerformance` 统一承载运行时
-- **涉及模块**：
-  - `packages/rig-core`：新增 `work.ts`（`workManifestSchema`、`viewportSchema` 纯 Zod 校验，保持纯 ES2022 零 DOM 依赖）并从 `index.ts` 导出；补充单元测试。
-  - `packages/rig-renderer`：新增 `performance.ts` 实现 `mountPerformance`：
-    - 同轴三层画箱（`.koma-box` + `.koma-canvas-stack`）与 `ResizeObserver` `fit / anchor` 缩放；
-    - 护栏 ①：支持单文件自包含模块 URL、内存模块对象与 Blob URL 生命周期释放；
-    - 护栏 ②：`stepTo(timeMs)` 通过 `reset()` + `stepMs`（默认 `10 ms`）固定步快进循环实现确定性采样；
-    - 护栏 ③：`back` / `front` 2D Canvas 物理像素 DPR 适配（`maxDpr` 上限）+ 每帧预置 `ctx2d.setTransform(...)`，逻辑坐标锁定 `manifest.canvas`；
-    - 护栏 ④：`errorPolicy`（默认 `'pause'` 自动暂停；可选 `'throttle'` 按签名去重节流），保留上一有效帧不崩页、不刷屏；
-    - 逻辑指针逆变换与 `poster` 兜底降级；从 `game.ts` / `index.ts` 导出并打进 `dist/runtime/player.js`。
-- **验收标准**：
-  - `npm run typecheck`、`npm test`、`npm run build:runtime` 全绿；
-  - `tests/dependencies.test.mjs` 与 Rollup `game-dependencies` 护栏通过（`player.js` 零 Vue/编辑器依赖）；
-  - 新增单元测试覆盖 `workManifestSchema` 校验、相对路径解析、`stepTo(timeMs)` 固定步确定性采样、DPR 逻辑坐标隔离、指针逆变换精度，以及 `errorPolicy: 'pause' / 'throttle'` 防 60fps 异常风暴。
-
-### 阶段 M2：Koma Live 动帧工坊前端落地
-- **涉及模块**：
-  - `apps/rig-studio`（或独立入口，按拍板决定）：落地 **Koma Live** 纯净动帧视图，复用同一个 `mountPerformance`：
-    - 支持打开本地 `koma-work.json` 或组合选择「切片目录 + 单文件演出脚本 `.js`」并支持一键 Blob URL 热重载；
-    - 实现底部自动生成的 `states` / `triggers` 交互条、播放/慢放/复位、底色切换、模拟卡片框；
-    - 实现可选同轴审查覆盖层（骨骼线、网格线、`GeometryError` 标红与自动暂停诊断条）。
-- **验收标准**：
-  - 现有 `npm run test:studio-layout` 布局护栏全部保持通过，不破坏 Studio 现有紧凑界面；
-  - 新增 Playwright 浏览器冒烟测试：校验 Koma Live 加载作品、触发 `states/triggers`、`stepTo` 确定性截帧、窗口缩放前后画箱对齐无漂移、异常自动暂停不白屏。
-
-### 阶段 M3：端到端样板动帧作品 & 下游真实作品对齐验证
-- **涉及内容**：
-  - 在仓库 `examples/` 中用 `koma-rig-animation` Skill 实写一份单文件自包含 `koma-rig.performance.v1` 样板演出（含多频呼吸、骨链相位传导、确定性 PRNG 粒子、指针视线响应、前后景光效、`states/triggers`）与 `koma-work.json`；
-  - 分别在 **Koma Live** 和一个**独立极简 HTML 宿主页**（模拟不同目录结构与嵌套容器尺寸）加载同一份作品，验证零修改、零漂移；
-  - 视需求同步更新 `project-lutie/prototype/js/rig-host.js` 接入 `mountPerformance`。
-
-### 阶段 M4：代码原生顶点变形口（Mesh Field，已落地）
 - **明确不做**：全局语义参数绑定面板、传统手捏 FFD 晶格编辑器。
-- **已实现接口**：在 `rig-core`（[mesh-field.ts](../packages/rig-core/src/mesh-field.ts)、[pose.ts](../packages/rig-core/src/pose.ts)）与 `LivePoseInput`（[game.ts](../packages/rig-renderer/src/game.ts)）中开放无 UI 负担的 `deform?: Record<string, MeshFieldFn | { grid?: [cols, rows], field: MeshFieldFn, minRatio?: number }>`：
+- **已落地接口（M4）**：在 `rig-core`（[mesh-field.ts](../packages/rig-core/src/mesh-field.ts)、[pose.ts](../packages/rig-core/src/pose.ts)）与 `LivePoseInput`（[game.ts](../packages/rig-renderer/src/game.ts)）中开放无 UI 负担的 `deform?: Record<string, MeshFieldFn | { grid?: [cols, rows], field: MeshFieldFn, minRatio?: number }>`：
   - `(u, v) ∈ [0, 1]²` 为切片局部归一化坐标，`(x, y)` 为原画布静止像素坐标（`rect.x + u * rect.w, rect.y + v * rect.h`），`[dx, dy]` 统一在静止空间施加后，再执行单骨矩阵变换或骨链蒙皮；
-  - 支持普通矩形与轮廓/骨链网格的按需缓存细化（`1..16`，默认 `6×6`）、X 轴扫描裁剪加速的 `checkGeometry` 实时安全校验、以及后续帧省略 `deform` 时渲染几何与 `gelGroups` 覆盖层的像素级干净回退。
+  - 支持普通矩形与轮廓/骨链网格的按需缓存细化（`1..16`，默认 `6×6`）、X 轴扫描裁剪加速的 `checkGeometry` 安全校验、以及后续帧省略 `deform` 时渲染几何与 `gelGroups` 覆盖层的像素级干净回退。
+- **已封板基础设施**：运行期 `validateGeometry` 开关（播放态默认关闭，审查/`inspect:live` 开启）、常规层 `rgba8unorm`、`LivePoseInput` 逐层 `opacity / tint / clipTo`（通用 Alpha 裁切蒙版）、同轴 2D 层 `layerResolutionScale`，以及零脚本改动的 `rig export-work --scale <0.25..1>`（`manifest.textureScale`）详见 [设计哲学与演进路线](design-philosophy.md#四koma-live-基础设施边界与极简克制原则)。
 
 ---
 

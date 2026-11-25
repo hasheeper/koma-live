@@ -17,7 +17,7 @@
     "typecheck": "tsc -b packages/rig-core packages/rig-renderer && npm run typecheck -w @koma-rig/rig-studio",
     "build": "npm run typecheck && npm run build:runtime && npm run build:studio",
     "build:studio": "tsc -b packages/rig-core packages/rig-renderer && npm run build -w @koma-rig/rig-studio",
-    "build:runtime": "vite build --config packages/rig-renderer/vite.runtime.config.mjs",
+    "build:runtime": "tsc -b packages/rig-core packages/rig-renderer && vite build --config packages/rig-renderer/vite.runtime.config.mjs",
     "test": "vitest run",
     "test:studio-layout": "npm run build:studio && node --test tests/studio-layout.browser.mjs",
     "test:live": "npm run build:runtime && npm run build:studio && node --test tests/koma-live.browser.mjs",

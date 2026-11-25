@@ -93,6 +93,10 @@ export interface MountPerformanceOptions {
   timeScale?: number
   stepMs?: number
   maxDpr?: number
+  /** Backing resolution multiplier in `(0, 1]` for coaxial 2D `back`/`front` layers (e.g. `0.5` saves 75% fill-rate). */
+  layerResolutionScale?: number
+  /** Run per-frame checkGeometry() self-intersection audit (defaults to `false` in playback; `true` in inspect/audit). */
+  validateGeometry?: boolean
   errorPolicy?: PerformanceErrorPolicy
   errorThrottleMs?: number
   onError?: (error: unknown) => void
@@ -114,6 +118,7 @@ export interface MountedPerformance {
   play(): void
   pause(): void
   setPointerTracking(enabled: boolean): void
+  setValidateGeometry(enabled: boolean): void
   setTimeScale(scale: number): void
   advanceBy(deltaMs: number): void
   stepTo(timeMs: number): void
@@ -245,6 +250,10 @@ export async function mountPerformance(
   const stepMs = options.stepMs ?? 10
   if (!Number.isFinite(stepMs) || stepMs <= 0) throw new Error('stepMs 必须为正数')
   const maxDpr = options.maxDpr ?? 2
+  const layerResolutionScale = options.layerResolutionScale ?? 1
+  if (!Number.isFinite(layerResolutionScale) || layerResolutionScale <= 0 || layerResolutionScale > 1) {
+    throw new Error('layerResolutionScale 必须在 (0, 1] 范围内')
+  }
   const errorGate = createErrorGate(options.errorPolicy ?? 'pause', options.errorThrottleMs ?? 1000)
 
   // Build coaxial container before mounting Pixi so puppet.canvas sits directly inside stack.
@@ -300,7 +309,7 @@ export async function mountPerformance(
   let factory: PerformanceFactory
   try {
     const [loadedPuppet, resolvedPerf] = await Promise.all([
-      mountLiveRig(puppetHost, rigSource),
+      mountLiveRig(puppetHost, rigSource, { validateGeometry: options.validateGeometry === true }),
       resolvePerformanceSource(perfSource),
     ])
     puppet = loadedPuppet
@@ -422,7 +431,15 @@ export async function mountPerformance(
     const next = computeViewportLayout(cw, ch, size.width, size.height, viewport)
     stack.style.transform = `translate(${next.offsetX}px, ${next.offsetY}px) scale(${next.scale})`
     const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1
-    const pixelScale = computeLayerPixelScale(dpr, next.scale, size.width, size.height, maxDpr)
+    const pixelScale = computeLayerPixelScale(
+      dpr,
+      next.scale,
+      size.width,
+      size.height,
+      maxDpr,
+      4096,
+      layerResolutionScale,
+    )
     const backResized = syncBackingResolution(backSlot, pixelScale)
     const frontResized = syncBackingResolution(frontSlot, pixelScale)
     layout = {
@@ -684,6 +701,9 @@ export async function mountPerformance(
     play,
     pause,
     setPointerTracking,
+    setValidateGeometry(enabled: boolean) {
+      puppet.setValidateGeometry(enabled)
+    },
     setTimeScale,
     advanceBy,
     stepTo,

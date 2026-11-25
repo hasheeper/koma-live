@@ -1,6 +1,6 @@
-# Koma Rig 功能规格
+# Koma Rig 核心规格
 
-本文是通用分层 2D 绑骨底盘与求值内核的功能和验收基线。Koma Rig 负责把精绘分层切片变成像素保真、结构清晰、带几何安全护栏的可动 2D 人偶；动画本身作为一个整体，可由前端代码或 AI（如程序化代码美术）通过实时 API 直接驱动整套骨架，也兼容离线静态动作片段。[离线制作与命令](offline-authoring.md) · [工作台说明](studio-layout-plan.md)
+本文是通用分层 2D 绑骨底盘与求值内核的功能和验收基线。Koma Rig 负责把精绘分层切片变成像素保真、结构清晰、带几何安全护栏的可动 2D 人偶；动画本身作为一个整体，可由前端代码或 AI（如程序化代码美术）通过实时 API 直接驱动整套骨架，也兼容离线静态动作片段。[设计哲学与演进](design-philosophy.md) · [工作台说明](studio-guide.md) · [离线制作与命令](offline-authoring.md)
 
 ## 1. 核心对象与分工
 
@@ -53,6 +53,20 @@
 | **轮廓网格（`bindings[].mesh`）** | 支持手绘多边形轮廓或按切片 Alpha 自动描绘（Trace），并可加点、删点、吸附微调与一键清除（`mesh: null`）。接受后的拓扑在导出重开后完全复现。 |
 | **实时几何体检（核心安全网）** | 对最终世界顶点检查静止有向面积 `A₀` 与当前面积 `Aₜ`（要求 `|A₀| > εA`、`sign(A₀)·Aₜ > εA`、`Aₜ/A₀ > εJ`），并另查同一变形面内非相邻三角形的边交叉、共线重叠与包含。失败时抛出带出错三角形坐标 `polygons` 的 `GeometryError`，工作台直接在画布标红定位。 |
 | **可选变形器（FFD / Ribbon）** | 内核支持 `3×3` / `4×4` 贝塞尔晶格（可锁边）与 Catmull-Rom 条带，并支持与轮廓网格、骨链叠加求值。定位为**按需局部软体补充**（如纯缩放难以模拟的非均匀膨胀），不作为强绑全局参数的前置门槛。 |
+
+### 3.1 参数化 Morph
+
+`rig.json` 的可选 `morphs[]` 保存每层一维或二维参数采样。各轴的 `parameter` 须在 `semantics.parameters` 声明，`samples` 至少两个且严格递增。超出采样范围时使用端点。二维样本按 `iy * nx + ix` 排列，一维按轴顺序排列。
+
+每个样本保存静止切片像素位移。对于 `grid: [cols, rows]`，行优先数组的长度为 `2 * (cols + 1) * (rows + 1)`，每个格点存 `dx, dy`，细分范围为 1 至 16。`null` 表示该参数点零位移。参数空间和切片 UV 空间依次插值，同层多个 Morph 的位移相加。脚本 `deform` 继续优先于原有 FFD 或 Ribbon，Morph 可与其中任一项叠加。位移随骨链蒙皮或单骨变换，动态 Alpha 裁切与投影同步使用最终网格。
+
+例如，宽、高任意的切片可写入以下单轴上移姿态。
+
+```json
+{"layerId":"face","grid":[1,1],"axes":[{"parameter":"lift","samples":[0,1]}],"deltas":[null,[0,-2,0,-2,0,-2,0,-2]]}
+```
+
+用 `set-morphs` 编辑操作替换整个列表，传入空数组可清除。演出脚本调用 `puppet.setPose({parameters: {lift: 0.5}})`。设计期的 `validateGeometry` 使用最终世界三角面，`minRatio` 可提高对应 Morph 的面积比门槛。[插值与校验](../packages/rig-core/src/morph.ts) · [离线头部烘焙](../tools/head-bake/README.md)
 
 ## 4. 素材、图层身份与像素复原
 

@@ -126,6 +126,7 @@ export function subdivideContourGrid(
   height: number,
   cols: number,
   rows: number,
+  splits?: Array<[number, number, number]>,
 ): Geometry {
   const vertices = source.vertices.slice()
   const uv = source.uv.slice()
@@ -181,6 +182,7 @@ export function subdivideContourGrid(
           k = vertices.length / 2
           intersections.set(key, k)
           const t = da / (da - db)
+          splits?.push([a, b, t])
           vertices.push(
             vertices[2 * a]! + t * (vertices[2 * b]! - vertices[2 * a]!),
             vertices[2 * a + 1]! + t * (vertices[2 * b + 1]! - vertices[2 * a + 1]!),

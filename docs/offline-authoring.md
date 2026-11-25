@@ -2,7 +2,7 @@
 
 在仓库根目录使用 Node 26。TypeScript 内核与 CLI 负责骨架、绑定、姿势求值与清单导出；离线 PNG 像素比对与出图使用 Python、NumPy 和 Pillow 环境（可用 `uv sync --locked --project tools/psd` 安装，或用 `KOMA_RIG_PYTHON` 指向已有解释器）。
 
-> **与实时驱动运行时的分工**：离线 CLI 适合批量建骨、像素级原稿复原、换图重导（`reimport`）与静态归档（`publish`）；若需要将角色接入前端程序化代码美术，请在完成绑骨后通过工作台或 `npm run rig -- spec <目录> [rig-spec.json]`（支持直接从含 `rig.json` 或仅含 `setup.json` 的源目录零落盘打印或导出）获取 `rig-spec.json`，并在宿主页面直接使用 `packages/rig-renderer/dist/runtime/player.js` 的 `mountPerformance` / `mountLiveRig` 进行实时骨骼 **TRS** 驱动。[功能规格](implementation-plan.md) · [演出契约与 Koma Live](performance-contract.md)
+> **与实时驱动运行时的分工**：离线 CLI 适合批量建骨、像素级原稿复原、换图重导（`reimport`）与静态归档（`publish`）；若需要将角色接入前端程序化代码美术，请在完成绑骨后通过工作台或 `npm run rig -- spec <目录> [rig-spec.json]`（支持直接从含 `rig.json` 或仅含 `setup.json` 的源目录零落盘打印或导出）获取 `rig-spec.json`，并在宿主页面直接使用 `packages/rig-renderer/dist/runtime/player.js` 的 `mountPerformance` / `mountLiveRig` 进行实时骨骼 **TRS** 驱动。[核心规格](rig-spec.md) · [演出契约与 Koma Live](performance-contract.md)
 
 ## 用两张纸条走完离线流程
 

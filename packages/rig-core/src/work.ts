@@ -135,14 +135,17 @@ export function computeLayerPixelScale(
   canvasHeight: number,
   maxDpr = 2,
   maxSidePx = 4096,
+  resolutionScale = 1,
 ): number {
   const safeDpr = Number.isFinite(devicePixelRatio) && devicePixelRatio > 0 ? devicePixelRatio : 1
   const safeDisplay = Number.isFinite(displayScale) && displayScale > 0 ? displayScale : 1
   const safeCap = Number.isFinite(maxDpr) && maxDpr >= 1 ? maxDpr : 1
+  const safeRes =
+    Number.isFinite(resolutionScale) && resolutionScale > 0 ? Math.min(1, resolutionScale) : 1
   const maxSide = Math.max(canvasWidth, canvasHeight)
   const sideCap = maxSide > 0 && maxSidePx > 0 ? Math.max(1, maxSidePx / maxSide) : safeCap
   const desired = Math.max(1, safeDpr * safeDisplay)
-  return Math.min(desired, safeCap, sideCap)
+  return Math.min(desired, safeCap, sideCap) * safeRes
 }
 
 /** Generate deterministic fixed-step increments from 0 to targetTimeMs for stepTo(). */

@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { parameterSchema } from './agent.js'
+import { layerMorphGridSchema } from './morph.js'
 import { attachmentMesh, deformer, point, prepareGeometry, type Point } from './geometry.js'
-import { bindingSchema, createRig, layerSetting, type Rig } from './pose.js'
+import { bindingSchema, castShadowSchema, createRig, layerSetting, type Rig } from './pose.js'
 import { neutral, type Values } from './sampling.js'
 import { boneSchema, boneTransformSchema, prepareSkeleton, compose, direction, identity, inverse, transform } from './skeleton.js'
 import type { SliceManifest } from './slices.js'
@@ -14,6 +15,8 @@ const documentSchema = z.looseObject({
   bindings: z.array(bindingSchema).default([]),
   drawOrder: z.array(id).optional(),
   layerSettings: z.array(layerSetting).optional(),
+  castShadows: z.array(castShadowSchema).optional(),
+  morphs: z.array(layerMorphGridSchema).optional(),
 })
 export const editSchema = z.discriminatedUnion('op', [
   z.strictObject({ op: z.literal('set-parameter'), parameter: parameterSchema }),
@@ -53,6 +56,8 @@ export const editSchema = z.discriminatedUnion('op', [
   z.strictObject({ op: z.literal('ffd-point'), ...layer, index: z.int().nonnegative(), offset: point }),
   z.strictObject({ op: z.literal('set-mesh'), ...layer, mesh: attachmentMesh.nullable() }),
   z.strictObject({ op: z.literal('set-deformer'), ...layer, deformer: deformer.nullable() }),
+  z.strictObject({ op: z.literal('set-cast-shadows'), castShadows: z.array(castShadowSchema) }),
+  z.strictObject({ op: z.literal('set-morphs'), morphs: z.array(layerMorphGridSchema) }),
 ])
 export type RigEdit = z.infer<typeof editSchema>
 
@@ -127,6 +132,12 @@ export function editRig(manifest: SliceManifest, input: unknown, commands: unkno
       else doc.layerSettings.push(setting)
     } else if (e.op === 'draw-order') {
       doc.drawOrder = e.layers
+    } else if (e.op === 'set-morphs') {
+      if (e.morphs.length) doc.morphs = e.morphs
+      else delete doc.morphs
+    } else if (e.op === 'set-cast-shadows') {
+      if (e.castShadows.length) doc.castShadows = e.castShadows
+      else delete doc.castShadows
     } else {
       const l = manifest.layers.find((l) => l.layerId === e.layerId)
       if (!l) throw new Error('未知图层 ' + e.layerId)
@@ -167,8 +178,10 @@ export function editRig(manifest: SliceManifest, input: unknown, commands: unkno
       } else if (e.op === 'set-mesh') {
         if (e.mesh) b.mesh = e.mesh
         else delete b.mesh
-      } else if (e.deformer) b.deformer = e.deformer
-      else delete b.deformer
+      } else if (e.op === 'set-deformer') {
+        if (e.deformer) b.deformer = e.deformer
+        else delete b.deformer
+      }
     }
     model = createRig(manifest, doc)
   }

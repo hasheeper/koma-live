@@ -147,6 +147,9 @@ describe('contract guardrails 1-4', () => {
     expect(computeLayerPixelScale(2, 3, 512, 512, 2, 4096)).toBe(2)
     // Huge 3000x3000 canvas -> bounded by maxSidePx=4096 (~1.365)
     expect(computeLayerPixelScale(2, 1, 3000, 3000, 2, 4096)).toBeCloseTo(4096 / 3000, 6)
+    // Half-resolution 2D layer scale cuts fill-rate by 75% while preserving logical coordinates
+    expect(computeLayerPixelScale(2, 0.35, 1024, 1536, 2, 4096, 0.5)).toBe(0.5)
+    expect(computeLayerPixelScale(2, 1, 512, 512, 2, 4096, 0.5)).toBe(1)
   })
 
   it('Guardrail 4: error gate auto-pauses once or deduplicates/throttles identical errors', () => {

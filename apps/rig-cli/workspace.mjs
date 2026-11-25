@@ -31,7 +31,7 @@ async function fileHash(path) {
 
 // Each project has a single atomically replaced draft journal. A pending digest
 // distinguishes a completed save from a process that stopped before the rename.
-export async function workspace(command, dir, argument) {
+export async function workspace(command, dir, argument, validateCandidate) {
   const root = join(dir, 'rig.json'),
     journal = join(dir, '.rig-draft.json')
   const writing = !['preview', 'inspect', 'recover'].includes(command)
@@ -71,7 +71,9 @@ export async function workspace(command, dir, argument) {
       state = initial()
     }
     let rig = state.history[state.index]
-    if (command === 'edit') {
+    if (command === 'edit' || command === 'edit-save') {
+      if (validateCandidate && digest(jsonBytes(rig)) !== state.clean)
+        throw new Error('已有未保存草稿，请先保存或另存草稿再烘焙')
       rig = editRig(manifest, rig, JSON.parse(await readFile(argument)))
       state.history.splice(++state.index, Infinity, rig)
     } else if (command === 'undo' || command === 'redo') {
@@ -82,6 +84,7 @@ export async function workspace(command, dir, argument) {
       rig = state.history[next]
     }
     const model = createRig(manifest, rig)
+    validateCandidate?.(manifest, rig, model, { base, manifestHash: digest(bytes) })
     if (command === 'preview') return previewRig(model, argument ? JSON.parse(await readFile(argument)) : {})
     if (command === 'inspect')
       return {
@@ -95,7 +98,8 @@ export async function workspace(command, dir, argument) {
         redo: state.history.length - 1 - state.index,
       }
     model.pose()
-    if (command === 'save') {
+    const save = command === 'save' || command === 'edit-save'
+    if (save) {
       state.pending = digest(jsonBytes(rig))
       await writeJson(journal, state)
       await writeJson(root, rig, async () => {
@@ -111,7 +115,7 @@ export async function workspace(command, dir, argument) {
       rigId: model.caps.rigId,
       bones: model.skeleton.byId.size,
       revision: state.index,
-      saved: command === 'save',
+      saved: save,
     }
   } finally {
     lock?.close()

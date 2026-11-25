@@ -211,6 +211,7 @@ async function runCaptureGroup(mountPerformance, host, sourceOpts, plan, group) 
     autoplay: false,
     stepMs: plan.stepMs,
     maxDpr: plan.maxDpr,
+    validateGeometry: true,
     errorPolicy: 'throttle',
     errorThrottleMs: 0,
     onError(err) {

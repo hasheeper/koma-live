@@ -10,6 +10,7 @@ from PIL import Image, ImageFilter
 from psd_tools import PSDImage
 from psd_tools.constants import BlendMode, ColorMode
 
+from layer_rig_psd.defringe import defringe_matte_report
 from layer_rig_psd.proof import compare, compose_package
 
 
@@ -148,6 +149,8 @@ def export_slices(
     trim_stray: bool = False,
     bake_reference: bool = False,
     skip_hidden: bool = False,
+    defringe: str | None = None,
+    defringe_strength: float = 1.0,
 ) -> dict:
     if blend_space not in ("srgb", "linear") or (gel_groups and blend_space != "srgb"):
         raise ValueError("同深度合成组使用 sRGB 直接预乘切片包")
@@ -180,6 +183,7 @@ def export_slices(
         entries = []
         seen = set()
         trimmed_layers = []
+        defringed_layers = []
 
         tree = []
         group_ids = set()
@@ -231,6 +235,12 @@ def export_slices(
                     pixels, dx, dy, trim_stats = trim_stray_alpha_report(pixels)
                     if trim_stats["changed"]:
                         trimmed_layers.append(dict(layerId=layer_id, name=layer.name, **trim_stats))
+                if defringe and defringe.lower() != "none":
+                    pixels, defringe_stats = defringe_matte_report(
+                        pixels, matte=defringe, strength=defringe_strength
+                    )
+                    if defringe_stats["changed"]:
+                        defringed_layers.append(dict(layerId=layer_id, name=layer.name, **defringe_stats))
                 texture = f"textures/{len(entries)}.png"
                 pixels.convert("RGBA").save(package / texture)
                 entries.append(
@@ -298,9 +308,11 @@ def export_slices(
         groupCount=len(tree),
         bakedReference=bake_reference,
         trimStray=trim_stray,
+        defringe=defringe if (defringe and defringe.lower() != "none") else None,
         skipHidden=skip_hidden,
         skippedHidden=skipped_hidden,
         trimmedLayers=trimmed_layers,
+        defringedLayers=defringed_layers,
         hazeWarnings=[item["layerId"] for item in trimmed_layers if item["hazeWarning"]],
     )
     if proof_report is not None:
@@ -322,6 +334,17 @@ def main():
     parser.add_argument("--gel-groups", type=Path, help="同深度组及美术确认的轮廓 PNG 映射")
     parser.add_argument("--id-map", type=Path, help="本次源稿层索引路径到持久 layerId 的人工映射 JSON")
     parser.add_argument("--trim-stray", action="store_true", help="清理孤立低透明噪点并紧致裁切各切片边界（保留连通柔边）")
+    parser.add_argument(
+        "--defringe",
+        default="none",
+        help="自动去除抠图底色杂边：none（默认）、white、black 或 #RRGGBB（建议配合 --bake-reference）",
+    )
+    parser.add_argument(
+        "--defringe-strength",
+        type=float,
+        default=1.0,
+        help="去边强度 0.0~1.0（默认 1.0）",
+    )
     parser.add_argument(
         "--bake-reference",
         action="store_true",
@@ -358,6 +381,8 @@ def main():
             trim_stray=args.trim_stray,
             skip_hidden=args.skip_hidden,
             bake_reference=args.bake_reference,
+            defringe=None if args.defringe.lower() == "none" else args.defringe,
+            defringe_strength=args.defringe_strength,
         )
         if args.report:
             args.report.parent.mkdir(parents=True, exist_ok=True)

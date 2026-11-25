@@ -3,6 +3,7 @@ import { sliceManifestSchema, type SliceManifest } from './slices.js'
 import { exportCapabilities } from './agent.js'
 import { attachmentMesh, deformer, checkGeometry, GeometryError, point, prepareGeometry, restMesh } from './geometry.js'
 import { prepareChain, quadGeometry } from './chain.js'
+import { accumulateMorph, interpolateMorph, layerMorphGridSchema, prepareMorphSurface, type LayerMorphGrid } from './morph.js'
 import {
   applyMeshField,
   buildRegularGrid,
@@ -97,9 +98,30 @@ export const layerSetting = z.strictObject({
   visible: z.boolean().optional(),
   peekOpacity: z.number().min(0).max(1).optional(),
   peekAfter: id.optional(),
+  /** Clip this layer's rendered output to another layer's live deformed Alpha silhouette. */
+  clipTo: id.optional(),
 })
+export const castShadowSchema = z.strictObject({
+  /** Layer IDs casting the shadow (live deformed geometry + transform). */
+  casters: z.array(id).min(1),
+  /** Receiver layer IDs onto whose union Alpha silhouette the shadow is clipped. */
+  receivers: z.array(id).min(1),
+  /** Shadow projection offset `[dx, dy]` in logical canvas pixels. */
+  offset: point,
+  /** Optional 24-bit RGB shadow tint (`0x000000..0xffffff`, default `0x6b5870`). */
+  color: z.number().int().min(0).max(0xffffff).optional(),
+  /** Peak shadow opacity in `[0, 1]` (default `0.2`). */
+  opacity: z.number().min(0).max(1).optional(),
+  /** Soft Gaussian blur radius in logical pixels (default `0` = crisp 2D cel anime shadow). */
+  blur: z.number().min(0).max(64).optional(),
+  /** Blending mode onto receiver surface (`'multiply'` default or `'normal'`). */
+  blendMode: z.enum(['multiply', 'normal']).optional(),
+})
+export type CastShadow = z.infer<typeof castShadowSchema>
 const rigData = z.object({
+  morphs: z.array(layerMorphGridSchema).default([]),
   layerSettings: z.array(layerSetting).default([]),
+  castShadows: z.array(castShadowSchema).default([]),
   bindings: z.array(bindingSchema).default([]),
   bones: z.array(boneSchema).default([]),
   drawOrder: z.array(id).optional(),
@@ -113,10 +135,24 @@ export interface Part {
   pivot: Point
   visible: boolean
   opacity?: number
+  tint?: number
   peekOpacity?: number
   peekAfter?: string
+  clipTo?: string
   geometry?: Geometry
   mask?: Point[]
+}
+export interface PoseOptions {
+  /** Per-layer runtime opacity multipliers in `[0, 1]` (multiplied with any drive opacity). */
+  opacity?: Record<string, number>
+  /** Per-layer runtime RGB tint integers in `0x000000..0xffffff` (defaults to `0xffffff`). */
+  tint?: Record<string, number>
+  /** Per-layer runtime Alpha clipping mask target `layerId` (pass `null` to clear a static `layerSettings.clipTo`). */
+  clipTo?: Record<string, string | null>
+  /** Runtime cast-shadow overrides (replaces static `rig.json` `castShadows` for this frame; `[]` clears). */
+  shadows?: CastShadow[]
+  /** Run full triangle flip/self-intersection checkGeometry() pass (defaults to `true`). */
+  validateGeometry?: boolean
 }
 /** Locate a material-space contact on the same piecewise-linear surface as the renderer. */
 export function attachmentPoint(part:Part, size:Point, local:Point):Point {
@@ -135,12 +171,13 @@ export function attachmentPoint(part:Part, size:Point, local:Point):Point {
 export interface Pose {
   bones?: BonePose[]
   parts: Part[]
+  shadows?: CastShadow[]
   parameters: Values
   slots: Record<string, string>
 }
 export function createRig(manifest: SliceManifest, raw: unknown) {
   const caps = exportCapabilities(raw),
-    { bones, bindings, drawOrder, layerSettings, eyes, gates, semantics } = rigData.parse(raw)
+    { bones, bindings, drawOrder, layerSettings, castShadows, eyes, gates, semantics, morphs } = rigData.parse(raw)
   if (caps.guidance)
     for (const c of caps.guidance.conditions)
       if (c.ranges?.length) gates.push({ slot: c.slot, from: c.from, to: c.to, ranges: c.ranges })
@@ -153,7 +190,35 @@ export function createRig(manifest: SliceManifest, raw: unknown) {
       throw new Error('未知或重复的图层设置 ' + s.layerId)
     if (s.peekAfter && !layers.has(s.peekAfter))
       throw new Error('未知透发锚点图层 ' + s.peekAfter)
+    if (s.clipTo) {
+      if (!layers.has(s.clipTo)) throw new Error('未知裁切目标图层 ' + s.clipTo)
+      if (s.clipTo === s.layerId) throw new Error('图层不能自裁切 ' + s.layerId)
+    }
   }
+  const validateCastShadows = (list: CastShadow[]) => {
+    for (const sh of list) {
+      if (!sh.casters.length || !sh.receivers.length) throw new Error('投影配置须同时指定投射与受影图层')
+      for (const cid of sh.casters) {
+        if (!layers.has(cid)) throw new Error('未知投影投射图层 ' + cid)
+      }
+      for (const rid of sh.receivers) {
+        if (!layers.has(rid)) throw new Error('未知投影受影图层 ' + rid)
+      }
+      if (!Number.isFinite(sh.offset[0]) || !Number.isFinite(sh.offset[1])) {
+        throw new Error('投影偏移须为有限数值')
+      }
+      if (sh.opacity !== undefined && (!Number.isFinite(sh.opacity) || sh.opacity < 0 || sh.opacity > 1)) {
+        throw new Error('投影不透明度须在 [0, 1] 内')
+      }
+      if (sh.blur !== undefined && (!Number.isFinite(sh.blur) || sh.blur < 0 || sh.blur > 64)) {
+        throw new Error('投影模糊半径须在 [0, 64] 内')
+      }
+      if (sh.color !== undefined && (!Number.isInteger(sh.color) || sh.color < 0 || sh.color > 0xffffff)) {
+        throw new Error('投影颜色须为 0x000000..0xffffff 整数')
+      }
+    }
+  }
+  validateCastShadows(castShadows)
   let orderedLayers = manifest.layers
   if (drawOrder) {
     if (
@@ -168,7 +233,21 @@ export function createRig(manifest: SliceManifest, raw: unknown) {
   const defs = neutral(caps).values
   const skeleton = prepareSkeleton(bones, defs)
   const params = new Map(caps.parameters.map((p) => [p.id, p]))
-  const surfaces = new Map<string, {restWorld:number[]; at:(amount:number)=>Geometry; chain?:ReturnType<typeof prepareChain>}>()
+  const surfaces = new Map<string, {restGeometry:Geometry; restWorld:number[]; at:(amount:number)=>Geometry; chain?:ReturnType<typeof prepareChain>}>()
+  const morphGroups = new Map<string, { grids: LayerMorphGrid[]; cols: number; rows: number }>()
+  for (const morph of morphs) {
+    if (!layers.has(morph.layerId)) throw new Error('Morph 未知图层 ' + morph.layerId)
+    for (const axis of morph.axes) {
+      if (!params.has(axis.parameter)) throw new Error(morph.layerId + ' Morph 未知参数 ' + axis.parameter)
+    }
+    morph.deltas = morph.deltas.map(delta => delta?.some(v => v !== 0) ? delta : null)
+    if (!morph.deltas.some(Boolean)) continue
+    const group = morphGroups.get(morph.layerId) ?? { grids: [], cols: 1, rows: 1 }
+    group.grids.push(morph)
+    group.cols = Math.max(group.cols, morph.grid[0])
+    group.rows = Math.max(group.rows, morph.grid[1])
+    morphGroups.set(morph.layerId, group)
+  }
   const ordered: Binding[] = [],
     visited = new Set<string>(),
     visiting = new Set<string>()
@@ -292,7 +371,7 @@ export function createRig(manifest: SliceManifest, raw: unknown) {
       base=chain.geometry
     }
     const at=b.deformer ? prepareGeometry(b.deformer,w,h,b.mesh||chain?base:undefined,false) : ()=>base
-    surfaces.set(b.layerId,{at,chain,restWorld:worldVertices(base.vertices,rest)})
+    surfaces.set(b.layerId,{at,chain,restGeometry:base,restWorld:worldVertices(base.vertices,rest)})
   }
   interface CachedFieldSurface {
     key: string
@@ -328,6 +407,23 @@ export function createRig(manifest: SliceManifest, raw: unknown) {
     fieldCache.set(layerId, entry)
     return entry
   }
+  type MorphSurface = ReturnType<typeof prepareMorphSurface> & {
+    source?: Geometry; cols: number; rows: number; restWorld: number[]; skinVectors?: CachedFieldSurface['skin']
+  }
+  const morphSurfaces = new Map<string, MorphSurface>()
+  function getMorphSurface(layerId: string, source: Geometry | undefined, cols: number, rows: number) {
+    const cached = morphSurfaces.get(layerId)
+    if (cached && cached.source === source && cached.cols === cols && cached.rows === rows) return cached
+    const [w, h] = layerSize(layerId)
+    const prepared = prepareMorphSurface(source, w, h, cols, rows)
+    const entry: MorphSurface = {
+      ...prepared, source, cols, rows,
+      restWorld: worldVertices(prepared.geometry.vertices, restLayerMatrix(layerId)),
+      skinVectors: surfaces.get(layerId)?.chain?.skinFor(prepared.geometry, true),
+    }
+    morphSurfaces.set(layerId, entry)
+    return entry
+  }
   function pose(
     parameters: Values = defs,
     slots = defaultSlots,
@@ -336,6 +432,7 @@ export function createRig(manifest: SliceManifest, raw: unknown) {
     rotations: Values = {},
     transforms: BoneTransforms = {},
     deform?: MeshFields,
+    options?: PoseOptions,
   ): Pose {
     for (const key of Object.keys(parameters)) if (!params.has(key)) throw new Error('未知参数 '+key)
     for (const p of caps.parameters) if (!Number.isFinite(parameters[p.id]))
@@ -345,6 +442,33 @@ export function createRig(manifest: SliceManifest, raw: unknown) {
         if (!layers.has(key)) throw new Error('未知变形图层 ' + key)
       }
     }
+    const runtimeOpacity = options?.opacity
+    if (runtimeOpacity) {
+      for (const [key, val] of Object.entries(runtimeOpacity)) {
+        if (!layers.has(key)) throw new Error('未知透明度图层 ' + key)
+        if (!Number.isFinite(val) || val < 0 || val > 1)
+          throw new Error(key + ' @ ' + timeMs + ' ms · 透明度须在 [0, 1] 范围内')
+      }
+    }
+    const runtimeTint = options?.tint
+    if (runtimeTint) {
+      for (const [key, val] of Object.entries(runtimeTint)) {
+        if (!layers.has(key)) throw new Error('未知着色图层 ' + key)
+        if (!Number.isInteger(val) || val < 0 || val > 0xffffff)
+          throw new Error(key + ' @ ' + timeMs + ' ms · 着色 tint 须为 0x000000..0xffffff 整数')
+      }
+    }
+    const runtimeClipTo = options?.clipTo
+    if (runtimeClipTo) {
+      for (const [key, target] of Object.entries(runtimeClipTo)) {
+        if (!layers.has(key)) throw new Error('未知裁切图层 ' + key)
+        if (target !== null) {
+          if (!layers.has(target)) throw new Error('未知裁切目标图层 ' + target)
+          if (target === key) throw new Error('图层不能自裁切 ' + key)
+        }
+      }
+    }
+    const validateGeometry = options?.validateGeometry !== false
     const activeFieldChecks = new Map<string, { restWorld: number[]; minRatio?: number }>()
     const frames = skeleton.evaluate(parameters, rotations, transforms)
     const world = new Map<string, Matrix>(),
@@ -390,17 +514,33 @@ export function createRig(manifest: SliceManifest, raw: unknown) {
           ? slots[b.variant.slot] === b.variant.state
           : (setting?.visible ?? l.visible),
       }
-      if (opacities.has(l.layerId)) result.opacity = opacities.get(l.layerId)!
+      const driveOpacity = opacities.get(l.layerId)
+      const overrideOpacity = runtimeOpacity?.[l.layerId]
+      if (driveOpacity !== undefined || overrideOpacity !== undefined) {
+        result.opacity = (driveOpacity ?? 1) * (overrideOpacity ?? 1)
+      }
+      const overrideTint = runtimeTint?.[l.layerId]
+      if (overrideTint !== undefined) result.tint = overrideTint
       if (setting?.peekOpacity && setting.peekOpacity > 0) {
         result.peekOpacity = setting.peekOpacity
         if (setting.peekAfter) result.peekAfter = setting.peekAfter
       }
+      const resolvedClipTo =
+        runtimeClipTo && Object.hasOwn(runtimeClipTo, l.layerId)
+          ? (runtimeClipTo[l.layerId] ?? undefined)
+          : setting?.clipTo
+      if (resolvedClipTo) result.clipTo = resolvedClipTo
       if (!result.matrix.every(Number.isFinite) || !result.pivot.every(Number.isFinite))
         throw new Error(l.layerId + ' @ ' + timeMs + ' ms · 非有限世界变换')
       const fieldInput = deform?.[l.layerId]
+      let fieldSurface: CachedFieldSurface | undefined
+      let fieldCols = 0, fieldRows = 0
       if (fieldInput !== undefined) {
         const { field, cols, rows, minRatio } = normalizeMeshField(fieldInput, l.layerId)
         const cached = getFieldSurface(l.layerId, cols, rows)
+        fieldSurface = cached
+        fieldCols = cols
+        fieldRows = rows
         const displaced = applyMeshField(cached.restGeometry, l.rect, field, l.layerId, timeMs)
         result.geometry = cached.skin ? cached.skin(frames, displaced) : displaced
         activeFieldChecks.set(l.layerId, { restWorld: cached.restWorld, minRatio })
@@ -408,6 +548,31 @@ export function createRig(manifest: SliceManifest, raw: unknown) {
         const amount=b?.deformer ? parameters[b.deformer.parameter]! - defs[b.deformer.parameter]! + (secondary[l.layerId] ?? 0) : 0
         const local=surface.at(amount)
         result.geometry=surface.chain ? surface.chain.posed(frames).geometry(local) : local
+      }
+      const group = morphGroups.get(l.layerId)
+      if (group) {
+        let refined: MorphSurface | undefined
+        let offsets: number[] | undefined
+        let minRatio = Math.max(fieldSurface ? activeFieldChecks.get(l.layerId)?.minRatio ?? .01 : 0,
+          b?.deformer?.minRatio ?? 0)
+        for (const morph of group.grids) {
+          const lattice = interpolateMorph(morph, parameters)
+          if (!lattice) continue
+          refined ??= getMorphSurface(l.layerId, fieldSurface?.restGeometry ?? surface?.restGeometry,
+            fieldCols >= group.cols ? 1 : group.cols, fieldRows >= group.rows ? 1 : group.rows)
+          offsets ??= new Array<number>(refined.geometry.uv.length).fill(0)
+          accumulateMorph(refined.geometry.uv, morph.grid, lattice, offsets)
+          minRatio = Math.max(minRatio, morph.minRatio ?? .01)
+        }
+        if (refined && offsets && offsets.some(v => v !== 0)) {
+          const mesh = refined.geometry
+          const vertices = refined.posedVertices(result.geometry)
+          // For linear blend skinning, skin(p + delta) = skin(p) + linearSkin(delta).
+          const vectors = refined.skinVectors?.(frames, { ...mesh, vertices: offsets }).vertices ?? offsets
+          for (let i = 0; i < vertices.length; i++) vertices[i] = vertices[i]! + vectors[i]!
+          result.geometry = { ...mesh, vertices }
+          activeFieldChecks.set(l.layerId, { restWorld: refined.restWorld, minRatio: minRatio || undefined })
+        }
       }
       return result
     })
@@ -453,29 +618,39 @@ export function createRig(manifest: SliceManifest, raw: unknown) {
     }
     for (const setting of layerSettings)
       if (setting.visible === false) byPart.get(setting.layerId)!.visible = false
-    for (const part of parts) {
-      const g = part.geometry
-      if (!g || !part.visible || part.opacity === 0 || layers.get(part.layerId)!.opacity === 0) continue
-      const fieldCheck = activeFieldChecks.get(part.layerId)
-      const surface = surfaces.get(part.layerId)
-      const restWorldRef = fieldCheck?.restWorld ?? surface?.restWorld
-      if (!restWorldRef) continue
-      const d = byId.get(part.layerId)?.deformer
-      try {
-        checkGeometry(
-          restWorldRef,
-          worldVertices(g.vertices, part.matrix),
-          g.indices,
-          d?.minArea ?? 1e-8,
-          fieldCheck?.minRatio ?? d?.minRatio ?? 0.01,
-        )
-      } catch (error) {
-        if (error instanceof GeometryError)
-          throw new GeometryError(part.layerId + ' @ ' + timeMs + ' ms · ' + error.message, error.polygons)
-        throw error
+    if (validateGeometry) {
+      for (const part of parts) {
+        const g = part.geometry
+        if (!g || !part.visible || part.opacity === 0 || layers.get(part.layerId)!.opacity === 0) continue
+        const fieldCheck = activeFieldChecks.get(part.layerId)
+        const surface = surfaces.get(part.layerId)
+        const restWorldRef = fieldCheck?.restWorld ?? surface?.restWorld
+        if (!restWorldRef) continue
+        const d = byId.get(part.layerId)?.deformer
+        try {
+          checkGeometry(
+            restWorldRef,
+            worldVertices(g.vertices, part.matrix),
+            g.indices,
+            d?.minArea ?? 1e-8,
+            fieldCheck?.minRatio ?? d?.minRatio ?? 0.01,
+          )
+        } catch (error) {
+          if (error instanceof GeometryError)
+            throw new GeometryError(part.layerId + ' @ ' + timeMs + ' ms · ' + error.message, error.polygons)
+          throw error
+        }
       }
     }
-    return { ...(bones.length ? { bones: [...frames.values()] } : {}), parts, parameters, slots: { ...slots } }
+    const activeShadows = options?.shadows !== undefined ? options.shadows : castShadows
+    if (options?.shadows !== undefined && options.shadows.length) validateCastShadows(options.shadows)
+    return {
+      ...(bones.length ? { bones: [...frames.values()] } : {}),
+      parts,
+      ...(activeShadows.length ? { shadows: activeShadows } : {}),
+      parameters,
+      slots: { ...slots },
+    }
   }
   return {
     caps,

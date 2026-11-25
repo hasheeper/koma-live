@@ -47,6 +47,18 @@ async function proof(dir, args) {
     throw new Error(error.stdout?.trim() || error.stderr?.trim() || error.message)
   }
 }
+async function runDefringe(args) {
+  try {
+    const { stdout } = await run(python, ['-m', 'layer_rig_psd.defringe', ...args], {
+      maxBuffer: 16 * 1024 * 1024,
+    })
+    return stdout ? JSON.parse(stdout) : undefined
+  } catch (error) {
+    if (error.code === 'ENOENT')
+      throw new Error('请用 uv sync --project tools/psd 安装离线像素工具，或指定 KOMA_RIG_PYTHON')
+    throw new Error(error.stdout?.trim() || error.stderr?.trim() || error.message)
+  }
+}
 async function copySlices(source, dest, manifest) {
   await mkdir(join(dest, 'textures'))
   for (const file of [...textures(manifest), manifest.reference]) await cp(join(source, file), join(dest, file))
@@ -80,6 +92,9 @@ export async function assetCommand(command, args) {
     if (args.length > 2) throw new Error('用法: rig verify-slices <目录> [差异图.png]')
     await readManifest(dir)
     return proof(dir, target ? ['--heatmap', target] : [])
+  }
+  if (command === 'defringe') {
+    return runDefringe(args)
   }
   if (command === 'reimport') return reimportProject(args)
   return releaseProject(command, args)

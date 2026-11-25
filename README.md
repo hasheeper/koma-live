@@ -218,16 +218,17 @@ uv run --locked --project tools/psd python -m unittest discover -s tools/psd/tes
 | `npm run rig -- spec <目录> [输出.json]` | 导出供程序化脚本与 AI 使用的 `rig-spec.json` 驱动清单 |
 | `npm run rig -- auto-mesh <目录> [--dry-run]` | 按 PNG Alpha 轮廓批量生成骨链安全轮廓网格 |
 | `npm run rig -- check-bend <目录>` | 扫描全部骨链的安全转角上限并报告翻面风险 |
-| `npm run rig -- export-work <作品目录> <输出目录>` | 导出只读展示包（可选 `--runtime <目录>` 同步 SDK、`--no-poster` 省去海报图） |
+| `npm run rig -- export-work <作品目录> <输出目录>` | 导出只读展示包（可选 `--scale 0.5` 降采省 4× 显存且零改脚本、`--runtime <目录>` 同步 SDK、`--no-poster`） |
 | `npm run inspect:live -- <作品> --times ...` | 无头 Chromium 固定步采样并合成多帧条带、洋葱皮与轨迹审片板 |
 
 <a id="文档导航"></a>
 
 ## 📚 文档导航
 
-- **规格与工作台**：[功能规格](docs/implementation-plan.md) · [工作台说明](docs/studio-layout-plan.md) · [编辑器参考](docs/editor-references.md)
-- **演出与验收契约**：[演出契约](docs/performance-contract.md) · [动帧视觉验收](docs/live-inspection-plan.md) · [AI 演出技能](.agents/skills/koma-rig-animation/SKILL.md)
-- **离线制作与维护**：[离线制作与验收](docs/offline-authoring.md) · [维护交接](docs/maintenance-handoff.md)
+- **理念与路线**：[设计哲学与演进路线](docs/design-philosophy.md)（赛博皮影戏总纲、微视差边界、AI 图阴影取舍与性能演进）
+- **核心规格与工作台**：[核心规格](docs/rig-spec.md) · [工作台说明](docs/studio-guide.md)
+- **演出与验收契约**：[演出契约](docs/performance-contract.md) · [动帧视觉验收](docs/live-inspection.md) · [AI 演出技能](.agents/skills/koma-rig-animation/SKILL.md)
+- **离线制作与归档**：[离线制作与验收](docs/offline-authoring.md) · [历史维护交接（2026-11-21）](docs/archive/maintenance-handoff-2026-11-21.md)
 - **兄弟项目**：[Koma Image](https://github.com/hasheeper/koma-image)（[在线体验](https://koma-image.pages.dev/) · 静帧生图与 EDIT 内 [Koma Layer](https://github.com/hasheeper/koma-image/blob/main/docs/workspaces/layer.md) 立绘拆层，上游直出 `koma-rig.slices.v2` 与分层 PSD）
 
 ## 💜 致谢

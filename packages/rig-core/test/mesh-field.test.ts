@@ -262,4 +262,73 @@ describe('M4 Mesh Field (code-native procedural vertex deformation)', () => {
     const elapsedMs = performance.now() - t0
     expect(elapsedMs).toBeLessThan(300)
   })
+
+  it('supports runtime opacity, tint, and validateGeometry opt-out on rig.pose()', () => {
+    const { manifest, rig } = makeMultiLayerFixture()
+    const model = createRig(manifest, rig)
+
+    const styled = model.pose(undefined, undefined, undefined, 16, {}, {}, undefined, {
+      opacity: { ribbon: 0.45 },
+      tint: { ribbon: 0xffe0cc },
+    })
+    const styledRibbon = styled.parts.find((p) => p.layerId === 'ribbon')!
+    expect(styledRibbon.opacity).toBeCloseTo(0.45, 6)
+    expect(styledRibbon.tint).toBe(0xffe0cc)
+
+    const plain = model.pose()
+    const plainRibbon = plain.parts.find((p) => p.layerId === 'ribbon')!
+    expect(plainRibbon.opacity).toBeUndefined()
+    expect(plainRibbon.tint).toBeUndefined()
+
+    expect(() =>
+      model.pose(undefined, undefined, undefined, 0, {}, {}, undefined, { opacity: { nope: 0.5 } }),
+    ).toThrow(/未知透明度图层/)
+    expect(() =>
+      model.pose(undefined, undefined, undefined, 0, {}, {}, undefined, { opacity: { ribbon: 1.5 } }),
+    ).toThrow(/透明度须在/)
+    expect(() =>
+      model.pose(undefined, undefined, undefined, 0, {}, {}, undefined, { tint: { nope: 0xffffff } }),
+    ).toThrow(/未知着色图层/)
+    expect(() =>
+      model.pose(undefined, undefined, undefined, 0, {}, {}, undefined, { tint: { ribbon: 0x1000000 } }),
+    ).toThrow(/着色 tint/)
+    expect(() =>
+      model.pose(undefined, undefined, undefined, 0, {}, {}, undefined, { tint: { ribbon: 12.5 } }),
+    ).toThrow(/着色 tint/)
+
+    const extremeFold = {
+      ribbon: {
+        grid: [6, 6] as const,
+        field: (u: number) => [(0.5 - u) * 260, 0] as const,
+      },
+    }
+    expect(() => model.pose(undefined, undefined, undefined, 32, {}, {}, extremeFold)).toThrow(GeometryError)
+    expect(() =>
+      model.pose(undefined, undefined, undefined, 32, {}, {}, extremeFold, { validateGeometry: false }),
+    ).not.toThrow()
+
+    // Static layerSettings.clipTo + runtime override/clear + validation
+    const rigWithClip = { ...rig, layerSettings: [{ layerId: 'ribbon', clipTo: 'bell_front' }] }
+    const modelWithClip = createRig(manifest, rigWithClip)
+    expect(modelWithClip.pose().parts.find((p) => p.layerId === 'ribbon')!.clipTo).toBe('bell_front')
+    expect(
+      modelWithClip.pose(undefined, undefined, undefined, 16, {}, {}, undefined, { clipTo: { ribbon: null } })
+        .parts.find((p) => p.layerId === 'ribbon')!.clipTo,
+    ).toBeUndefined()
+    expect(
+      modelWithClip.pose(undefined, undefined, undefined, 16, {}, {}, undefined, { clipTo: { tentacle: 'bell_back' } })
+        .parts.find((p) => p.layerId === 'tentacle')!.clipTo,
+    ).toBe('bell_back')
+    expect(() =>
+      modelWithClip.pose(undefined, undefined, undefined, 0, {}, {}, undefined, { clipTo: { ribbon: 'ribbon' } }),
+    ).toThrow(/自裁切/)
+    expect(() =>
+      modelWithClip.pose(undefined, undefined, undefined, 0, {}, {}, undefined, { clipTo: { ribbon: 'nope' } }),
+    ).toThrow(/未知裁切目标/)
+
+    // v2 sliceManifestSchema accepts optional textureScale in (0, 1]
+    expect(sliceManifestSchema.parse({ ...manifest, textureScale: 0.5 }).format).toBe('koma-rig.slices.v2')
+    expect(() => sliceManifestSchema.parse({ ...manifest, textureScale: 0 })).toThrow()
+    expect(() => sliceManifestSchema.parse({ ...manifest, textureScale: 1.5 })).toThrow()
+  })
 })

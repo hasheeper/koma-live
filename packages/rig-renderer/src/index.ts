@@ -1,4 +1,11 @@
-export { mountLiveRig, mountPublished, type LivePoseInput, type LiveRigPlayer, type LiveRigSource } from './game.js'
+export {
+  mountLiveRig,
+  mountPublished,
+  type LivePoseInput,
+  type LiveRigPlayer,
+  type LiveRigSource,
+  type MountLiveRigOptions,
+} from './game.js'
 export * from './performance.js'
 export { mountCharacter } from './character.js'
 import type { CanvasSize, PixelRect } from '@koma-rig/rig-core'

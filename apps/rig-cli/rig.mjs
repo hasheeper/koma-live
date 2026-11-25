@@ -1,4 +1,6 @@
 import { existsSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import { mkdir, readdir, readFile } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 import { assetCommand } from './assets.mjs'
@@ -9,6 +11,14 @@ import { auditMotions, capabilitiesJsonSchema, createPlayer, createRig, editRig,
 
 async function main() {
   const [command, file, target, ...extra] = process.argv.slice(2)
+  if (command === 'bake-head') {
+    const tool = fileURLToPath(new URL('../../tools/head-bake/', import.meta.url))
+    const python = process.env.KOMA_HEAD_BAKE_PYTHON || join(tool, '.venv', process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python')
+    const child = spawnSync(python, [join(tool, 'bake_tha3.py'), ...process.argv.slice(3)], { stdio: 'inherit' })
+    if (child.error) throw child.error
+    process.exitCode = child.status ?? 1
+    return
+  }
   if (command === 'auto-mesh') {
     console.log(JSON.stringify(await runAutoMesh(parseAutoMeshArgs(process.argv.slice(3))), null, 2))
     return
@@ -21,8 +31,8 @@ async function main() {
     console.log(JSON.stringify(await runExportWork(parseExportWorkArgs(process.argv.slice(3))), null, 2))
     return
   }
-  if (['import','render','verify-slices','reimport','review','publish'].includes(command)) {
-    console.log(JSON.stringify(await assetCommand(command, process.argv.slice(3))))
+  if (['import','render','verify-slices','defringe','reimport','review','publish'].includes(command)) {
+    console.log(JSON.stringify(await assetCommand(command, process.argv.slice(3)), null, command === 'defringe' ? 2 : 0))
     return
   }
   if (['edit', 'undo', 'redo', 'save', 'inspect', 'preview', 'recover'].includes(command)) {

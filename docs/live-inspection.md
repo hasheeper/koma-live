@@ -1,7 +1,7 @@
-# Koma Live 动帧视觉验收与自由排版工具规划
+# Koma Live 动帧视觉验收指南（`inspect:live`）
 
-> **状态**：第一步（`npm run inspect:live` 自由排版验收工具 + `setup.json` 自动合成）与第二步（GBot 纯刚体机器人动画重做与逐帧验收）均已落地并通过回归（`npm run test:live`）；第三步（Koma Live 页面轻量洋葱皮开关）待按需启动。  
-> **关联文档**：[演出契约与 Koma Live](performance-contract.md) · [功能规格](implementation-plan.md) · [AI 演出技能](../.agents/skills/koma-rig-animation/SKILL.md)
+> **说明**：`npm run inspect:live` 自由排版审片器（`koma-rig.inspect.v1`）与 `setup.json` 零落盘合成均已落地并通过回归（`npm run test:live`）。  
+> **关联文档**：[设计哲学与演进](design-philosophy.md) · [演出契约与 Koma Live](performance-contract.md) · [核心规格](rig-spec.md) · [AI 演出技能](../.agents/skills/koma-rig-animation/SKILL.md)
 
 ## 1. 设计动机：为什么不是“录视频”，也不是“写死模板”？
 
@@ -304,24 +304,13 @@ Agent 可以一次声明生成 **1 张或多张 PNG 审片板**；每张画板�
 
 ---
 
-## 5. 分阶段实施路线与当前状态
+## 5. 实现映射与待选扩展
 
-### 第一步（已完成）：运行时微增 + `inspect:live` 自由排版验收引擎
-1. **运行时微增**（[performance.ts](../packages/rig-renderer/src/performance.ts)）：
-   - 已落地 `advanceBy(deltaMs)`（`stepTo(timeMs)` 复用 `reset()` + `advanceBy(timeMs)`）、`setPointer(pointer)` 与 `pointerTracking / setPointerTracking(enabled)`；
-   - `npm run typecheck`、`npm run build:runtime` 与 `npm run test:live` 全绿。
-2. **`apps/rig-cli` 侧独立契约校验与快捷翻译**（零新增依赖，不碰 `packages/rig-core`）：
-   - 已落地 [inspect-plan.mjs](../apps/rig-cli/inspect-plan.mjs) 与 [inspect-plan.test.ts](../tests/inspect-plan.test.ts)（覆盖 `strip / grid / onion / frame / compare`、`channel: 'rgba' | 'alpha'`、跨视口 `compare.entries` 采样分组与快捷 CLI 翻译）。
-3. **无头同步抓帧、自由排版合成与开发目录直通**（[inspect-live.mjs](../apps/rig-cli/inspect-live.mjs) · [inspect-composer.mjs](../apps/rig-cli/inspect-composer.mjs) · [rig.mjs](../apps/rig-cli/rig.mjs)）：
-   - 本地临时静态服务按需映射目标作品文件，支持目录简写与 `setup.json` 内存动态合成（提前校验、不污染源目录），同步提供 `npm run rig -- spec <目录> [输出.json]` 零落盘查看 `rig-spec.json`；
-   - 在 Playwright Chromium 中按固定微步推进剧本，每步同步将 `back → puppet → front` 绘入离屏 2D 缓存（确保 WebGL 非空且无滞后一帧），支持同 `t` 跨视口 `compare` 独立采样与 `overlay` 叠差对比；
-   - 审片板叠加层采用高对比琥珀金弧线（带起止点区分与图例）、裁切安全带底衬的水平/垂直 `guides`、骨骼/网格与 `GeometryError` 标红，输出高清 `boards[]` PNG 与含 `rotationDeg` / `effectiveScale` 的 `telemetry.json`。
-4. **端到端回归与 `SKILL.md` 闭环**：
-   - [koma-live.browser.mjs](../tests/koma-live.browser.mjs) 全面验证同步 WebGL 抓帧、`alpha` 通道、Spine 洋葱皮、同 `t` 跨视口 `compare`、`overlay` 叠差、`setup.json` 自动合成、同刻 `state + pointer` 注入与 `telemetry.json`；
-   - 已同步沉淀至 [SKILL.md](../.agents/skills/koma-rig-animation/SKILL.md)、[tools-and-contracts.md](../.agents/skills/koma-rig-animation/references/tools-and-contracts.md) 与 [craft-and-playbooks.md](../.agents/skills/koma-rig-animation/references/craft-and-playbooks.md)。
+| 模块 | 落地文件 |
+|---|---|
+| 确定性步进与逻辑指针原语 | [performance.ts](../packages/rig-renderer/src/performance.ts)（`advanceBy`、`stepTo`、`setPointer`、`pointerTracking`） |
+| 协议校验与快捷 CLI 翻译（零新依赖） | [inspect-plan.mjs](../apps/rig-cli/inspect-plan.mjs) · [inspect-plan.test.ts](../tests/inspect-plan.test.ts) |
+| 无头同步抓帧与自由排版合成器 | [inspect-live.mjs](../apps/rig-cli/inspect-live.mjs) · [inspect-composer.mjs](../apps/rig-cli/inspect-composer.mjs) · [rig.mjs](../apps/rig-cli/rig.mjs) |
+| 端到端回归与样板验收 | [koma-live.browser.mjs](../tests/koma-live.browser.mjs) · [gbot-live.js](../examples/gbot/motion/gbot-live.js) |
 
-### 第二步（已完成）：重做 GBot 纯刚体机器人动画并用 `inspect:live` 逐帧验收
-- 已按刚体规范（全骨 `scale = 1` + 2-Bone IK 双脚焊地 + 5 段重金属跳跃 + 干净招手 + 硬金属受击 + 地板钳制 2D 机械特效）重写 [gbot-live.js](../examples/gbot/motion/gbot-live.js)，通过两轮自由排版审片板迭代修复全部细节，并将全骨 `effectiveScale === [1, 1]` 与地面 0px 焊地不变量锁定在 `npm run test:live` 回归中。
-
-### 第三步（按需）：Koma Live 网页端轻量洋葱皮开关
-- 在 [KomaLive.vue](../apps/rig-studio/src/KomaLive.vue) 审查层增加暂停态影子帧开关（零实时播放开销）。
+**按需可选扩展**：在 [KomaLive.vue](../apps/rig-studio/src/KomaLive.vue) 审查层增加暂停态轻量洋葱皮开关（零实时播放开销）。

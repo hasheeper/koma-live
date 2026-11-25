@@ -9,17 +9,19 @@
 ### 1.1 PSD 离线切片与去噪烘焙（`tools/psd`）
 
 ```sh
-# 方式 A：单命令去孤立噪点/整画布雾噪 + 按 sRGB PMA 烘焙干净 reference.png 并内置 0 误差复验（推荐）
+# 方式 A：单命令去孤立噪点/整画布雾噪、跳过隐藏参考层、自动去抠图白边 + 按 sRGB PMA 烘焙干净 reference.png 并内置 0 误差复验（推荐）
 uv run --locked --project tools/psd python -m layer_rig_psd.slices \
-  character.psd examples/char/slices --source-id char --trim-stray --bake-reference
+  character.psd examples/char/slices --source-id char --skip-hidden --trim-stray --defringe white --bake-reference
 
 # 方式 B：提供美术导出的独立参考 PNG
 uv run --locked --project tools/psd python -m layer_rig_psd.slices \
-  character.psd reference.png examples/char/slices --source-id char --trim-stray
+  character.psd reference.png examples/char/slices --source-id char --skip-hidden --trim-stray
 ```
 
 - 前置要求：8-bit RGB PSD，普通栅格图层（蒙版/剪贴/特效/组混合须在美术侧先烘焙）。
 - `--trim-stray` 采用滞后连通域清理（`strong >= 40, weak >= 6, halo = 3px`），保留连通柔边、清掉孤立角落脏点与低透明雾膜，输出 JSON 含 `trimmedLayers` 与 `hazeWarnings`（自动标记大面积低透明雾噪层）。
+- `--defringe white|black|#RRGGBB`（及对已有切片包直接执行的 `npm run rig -- defringe <作品或切片目录> [--matte white] [--strength 1.0] [--layers a,b] [--exclude c,d] [--dry-run]`）采用颜色空间逆混合（按局部干净内色 $F \to M$ 投影反解杂色比例 $t$ 并同步还原 $\alpha_{\text{new}}=\alpha(1-t)$），清除半透明白边与 1–2 px 实心抠图杂边，同时保留纯白蕾丝/白发与彩色自发光，不改 `rect` 与 `rig.json` 并自动重烘复验 `reference.png`。
+- 切片清单 Schema 纪律：`manifest.json` 的 `texture` 路径必须平铺在 `textures/` 根目录（匹配 `/^textures\/[A-Za-z0-9_-]+\.png$/`，不可建子目录）；新增表情/漫符等非默认差分图层时，在 `manifest.json` 置 `visible: false` 即可同时保持 `verify-slices` `mismatches === 0` 且运行期由 `slots` 正常切换。
 - 复验已有切片包：`npm run rig -- verify-slices <切片目录> [差异热图.png]`（8-bit PMA 逐像素比对，`mismatches === 0` 通过）。
 
 ### 1.2 骨架编辑、自动轮廓网格与安全角体检（`npm run rig`）
@@ -40,12 +42,17 @@ npm run rig -- check-bend <作品或切片目录> --max-angle 75 --warn-below 18
 # 批量应用 RigEdit JSON 操作数组并保存
 npm run rig -- edit <切片目录> edits.json
 npm run rig -- save <切片目录>
+
+# 导出只读展示包（可选 --scale 0.5 预乘防黑边降采贴图，写入 manifest.textureScale，rig.json 与脚本零改动、省 4× 显存）
+npm run rig -- export-work <作品目录> <输出目录> [--scale 0.5] [--runtime <运行时目录>] [--no-poster]
 ```
 
 - `auto-mesh` 默认预设：
   - `boneChain` 图层：`detail: 28, concavity: 10, refinement: 50, padding: 4`（低凹度防翻面）
   - 单骨图层（`--all`）：`detail: 42, concavity: 32, refinement: 50, padding: 3`（高贴合）
   - 可用 `--detail` / `--concavity` / `--padding` / `--refinement` / `--alpha-threshold` 覆盖。
+- `rig.json` 差分槽（`semantics.slots`）纪律：每个非默认状态都必须在 `transitions` 中存在回到 `default` 的有向边（每条边须含 `minHoldMs: 0, exitWindowMs: [0, 0]`），否则 `rig spec` 会报无法回到默认态。
+- `set-layer` 图层设置支持 `visible`、`locked`、`peekOpacity`、`peekAfter`（ACGN 透发）以及 `clipTo`（通用图层 Alpha 裁切蒙版，目标不可为自身）。
 
 ### 1.3 Studio 与 Koma Live 零摩擦联调
 
@@ -161,18 +168,45 @@ interface LivePoseInput {
   parameters?: Record<string, number>
   slots?: Record<string, string>
   deform?: MeshFields
+  /** 逐层运行期透明度倍率 [0, 1]（与驱动透明度相乘；下一帧省略即恢复 1） */
+  opacity?: Record<string, number>
+  /** 逐层运行期 RGB 染色整数 0x000000..0xffffff（透发层自动继承；下一帧省略即恢复 0xffffff） */
+  tint?: Record<string, number>
+  /** 逐层运行期 Alpha 裁切目标 layerId（传 null 可临时清除静态 layerSettings.clipTo） */
+  clipTo?: Record<string, string | null>
+  /** 实时自动裁剪投影（不传沿用 rig.json 的 castShadows，传 [] 清除）：多投射层合并剪影先柔化再按受影层 Alpha 裁切 + multiply 混合，零叠黑零溢出 */
+  shadows?: Array<{
+    casters: string[]
+    receivers: string[]
+    offset: [number, number]
+    color?: number      // 默认 0x6b5870（肤色推荐按原画阴影采样暖粉灰如 0xd0b0b6，白发推荐冷银灰如 0xbcb8c4）
+    opacity?: number    // 默认 0.2
+    blur?: number       // 默认 0（锐利 2D 赛璐璐硬影，零高斯模糊开销；>0 可选柔影）
+    blendMode?: 'multiply' | 'normal'
+  }>
   timeMs?: number
 }
+
+interface MountPerformanceOptions {
+  // ...work / rig / performance / poster / viewport / initialState / autoplay / pointerTracking / timeScale / stepMs / maxDpr
+  /** 同轴 2D back/front 画布缓冲分辨率倍率 (0, 1]（如 0.5 省 75% 像素填充率，逻辑坐标保持 1× 不变） */
+  layerResolutionScale?: number
+  /** 是否每帧执行全量 checkGeometry 体检（播放态默认 false 提速 ~20×；inspect:live 与 Koma Live 审查态开启 true） */
+  validateGeometry?: boolean
+}
 ```
-- **Mesh Field 行为要点**：
+- **Mesh Field 与运行期新原语要点**：
   - 所有绑定模式（未绑骨、单骨 `boneId`、骨链 `boneChain`）统一顺序：**先在静止空间叠加 `[dx, dy]`，再执行单骨矩阵变换或骨链蒙皮**，波浪方向自动跟随部件旋转与弯曲。
   - 普通切片自动生成并缓存 `[cols, rows]` 规则网格；带轮廓网格（`mesh`）或骨链的切片沿静止切线平面细分且严格保留原轮廓边界；同密度复用 `indices` 引用，WebGL 走零重分配快路径且同步作用 `gelGroups` 覆盖层。
-  - 动态启停干净回退：后续帧不再传该 `layerId` 或省略 `deform` 时，渲染几何与 `gelGroups` 覆盖网格自动恢复至无变形状态，不残留顶点。
-  - 每次求值仍经过 `checkGeometry`（X 轴扫描裁剪 + AABB 预筛），翻面或自交照常抛出 `GeometryError`。
+  - 动态启停干净回退：后续帧不再传 `deform` / `opacity` / `tint` / `clipTo`（或传 `clipTo: { id: null }`）时自动干净恢复，0 残留。
+  - **显存与几何自检**：WebGL 渲染器仅对 `gelGroups` 成员保留 `rgba16float`，其余常规切片默认 `rgba8unorm`（省 50% 显存）；导出包若含 `manifest.textureScale`（如 `0.5`），逻辑画布与坐标仍为 1×，演出脚本零改动。`mountLiveRig` / `mountPerformance` 默认 `validateGeometry: false`（可通过 `setValidateGeometry(true)` 随时开启），而 `inspect:live`、`rig check-bend`、Studio 试动与 Koma Live「审查」模式始终开启全量 `checkGeometry`。
 
 `const pose = puppet.setPose(...)` 返回实时世界坐标 `pose.bones`（`start`, `end`, `matrix`）与 `pose.parts`（`pivot`, `matrix`, `visible`）——前后景特效直接锚定 `pose`，不手算二次矩阵。
 
+**参数化头转。** 在 `semantics.parameters` 声明 `headYaw` 和 `headPitch` 后，演出可用 `puppet.setPose({ parameters: {headYaw, headPitch}, bones, deform, slots })` 驱动烘焙在 `rig.json.morphs` 的位移。单文件脚本管理眨眼与惯性。每次 `setPose` 后，`puppet.projectRestPoint(layerId, [原画布X, 原画布Y])` 可定位实际变形后的眼部高光等附着点。接口读取与 WebGL 相同的三角面。[数据契约](../../../../docs/rig-spec.md) · [烘焙命令](../../../../tools/head-bake/README.md)
+
 ### 3.2 `mountPerformance` 四条运行护栏
+
 1. **单文件自包含 ES Module**：零外部相对或包 `import`（兼容 Koma Live `Blob URL` 热重载）。
 2. **确定性采样与洁净 `reset()`**：禁用 `Date.now()` / `performance.now()` / `Math.random()`；仅以 `timeMs / dtMs` 与确定性 PRNG 推进，并在 `reset()` 中完全归零内部状态（`stepTo(t)` 通过 `reset()` + 固定 `stepMs` 步进实现）。
 3. **2D DPR 逻辑绘制**：宿主已按 `maxDpr`（默认 `2`）设置物理缓冲并预置 `ctx2d.setTransform(pixelScale, 0, 0, pixelScale, 0, 0)`；脚本严格按 `ctx.size` 逻辑像素绘制和清屏，自定义变换用 `save()/restore()`，**禁止调用 `resetTransform()`**。

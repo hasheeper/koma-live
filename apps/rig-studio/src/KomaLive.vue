@@ -318,6 +318,7 @@ async function mountBundle(bundle: LiveWorkBundle, preserveState?: string) {
       initialState: preserveState ?? bundle.defaultState,
       pointerTracking: pointerTracking.value,
       timeScale: timeScale.value,
+      validateGeometry: inspect.value,
       errorPolicy: 'pause',
       onError(err) {
         if (token !== loadGeneration) return
@@ -694,7 +695,10 @@ watch(framePreset, () => {
   mounted.setViewport(viewportForPreset(framePreset.value, activeWork.value.viewport))
 })
 
-watch(inspect, () => drawOverlay())
+watch(inspect, (enabled) => {
+  mounted?.setValidateGeometry(enabled)
+  drawOverlay()
+})
 watch(pointerTracking, (enabled) => {
   mounted?.setPointerTracking(enabled)
   if (!enabled && inspect.value) {

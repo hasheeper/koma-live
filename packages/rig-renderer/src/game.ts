@@ -1,4 +1,5 @@
 import {
+  attachmentPoint,
   createInteractionPlayer,
   createRig,
   exportCapabilities,
@@ -8,8 +9,10 @@ import {
   releaseSchema,
   sliceManifestSchema,
   type BoneTransforms,
+  type CastShadow,
   type MeshFields,
   type Pose,
+  type Point,
   type RigSpec,
   type SliceManifest,
 } from '@koma-rig/rig-core'
@@ -27,14 +30,31 @@ export interface LivePoseInput {
   parameters?: Record<string, number>
   slots?: Record<string, string>
   deform?: MeshFields
+  /** Per-layer runtime opacity multipliers in `[0, 1]`. */
+  opacity?: Record<string, number>
+  /** Per-layer runtime RGB tint integers in `0x000000..0xffffff`. */
+  tint?: Record<string, number>
+  /** Per-layer runtime Alpha clipping mask target `layerId` (`null` clears static `clipTo`). */
+  clipTo?: Record<string, string | null>
+  /** Runtime automatic clipped cast shadows (`[]` disables static `rig.json` `castShadows`). */
+  shadows?: CastShadow[]
   timeMs?: number
+}
+
+export interface MountLiveRigOptions {
+  /** Run per-frame triangle flip/self-intersection checkGeometry() pass (defaults to `false` for production speed). */
+  validateGeometry?: boolean
 }
 
 export interface LiveRigPlayer {
   canvas: HTMLCanvasElement
   spec: RigSpec
   readonly pose: Pose
+  readonly validateGeometry: boolean
+  setValidateGeometry(enabled: boolean): void
   setPose(input?: LivePoseInput): Pose
+  /** Map an original artwork point on a layer to its current drawn position. */
+  projectRestPoint(layerId: string, canvasPoint: Point): Point
   render(): void
   reset(): Pose
   destroy(): void
@@ -51,6 +71,7 @@ async function fetchRelative(dir: URL, path: string) {
 export async function mountLiveRig(
   host: HTMLElement,
   source: string | URL | LiveRigSource,
+  options?: MountLiveRigOptions,
 ): Promise<LiveRigPlayer> {
   let manifest: SliceManifest
   let raw: unknown
@@ -80,9 +101,11 @@ export async function mountLiveRig(
   }
 
   const rig = createRig(manifest, raw)
+  const rects = new Map(manifest.layers.map(l => [l.layerId, l.rect]))
   const spec = exportRigSpec(manifest, raw)
   const defaults = neutral(rig.caps).values
   const view = await mountCharacter(host, manifest, files)
+  let validateGeometry = options?.validateGeometry === true
   let current: Pose
 
   function setPose(input: LivePoseInput = {}): Pose {
@@ -96,6 +119,13 @@ export async function mountLiveRig(
       input.rotations ?? {},
       input.bones ?? {},
       input.deform,
+      {
+        ...(input.opacity ? { opacity: input.opacity } : {}),
+        ...(input.tint ? { tint: input.tint } : {}),
+        ...(input.clipTo ? { clipTo: input.clipTo } : {}),
+        ...(input.shadows !== undefined ? { shadows: input.shadows } : {}),
+        validateGeometry,
+      },
     )
     view.update(next)
     current = next
@@ -115,7 +145,19 @@ export async function mountLiveRig(
     get pose() {
       return current
     },
+    get validateGeometry() {
+      return validateGeometry
+    },
+    setValidateGeometry(enabled: boolean) {
+      validateGeometry = Boolean(enabled)
+    },
     setPose,
+    projectRestPoint(layerId, [x, y]) {
+      const rect = rects.get(layerId)
+      const part = current.parts.find(p => p.layerId === layerId)
+      if (!rect || !part) throw new Error('未知图层 ' + layerId)
+      return attachmentPoint(part, [rect[2], rect[3]], [x - rect[0], y - rect[1]])
+    },
     render: () => view.update(current),
     reset: () => setPose(),
     destroy: view.destroy,

@@ -21,6 +21,8 @@ const legacy = z.strictObject({
 })
 const direct = legacy.extend({
   format:z.literal('koma-rig.slices.v2'),blendSpace:z.literal('srgb'),
+  /** Optional uniform texture downsample ratio in `(0, 1]` (e.g. `0.5` for half-res mobile export); logical canvas & rects stay 1×. */
+  textureScale:z.number().positive().max(1).optional(),
   gelGroups:z.array(z.strictObject({opacity:z.number().min(0).max(1),
     members:z.array(z.strictObject({layerId:z.string(),coverage:texturePath})).min(1)})).optional(),
 })
