@@ -4,6 +4,7 @@ import { exportCapabilities } from './agent.js'
 import { attachmentMesh, deformer, checkGeometry, GeometryError, point, prepareGeometry, restMesh } from './geometry.js'
 import { prepareChain, quadGeometry } from './chain.js'
 import { accumulateMorph, interpolateMorph, layerMorphGridSchema, prepareMorphSurface, type LayerMorphGrid } from './morph.js'
+import { headCalibrationSchema } from './head-morph.js'
 import {
   applyMeshField,
   buildRegularGrid,
@@ -120,6 +121,7 @@ export const castShadowSchema = z.strictObject({
 export type CastShadow = z.infer<typeof castShadowSchema>
 const rigData = z.object({
   morphs: z.array(layerMorphGridSchema).default([]),
+  headCalibration: headCalibrationSchema.optional(),
   layerSettings: z.array(layerSetting).default([]),
   castShadows: z.array(castShadowSchema).default([]),
   bindings: z.array(bindingSchema).default([]),
@@ -177,7 +179,7 @@ export interface Pose {
 }
 export function createRig(manifest: SliceManifest, raw: unknown) {
   const caps = exportCapabilities(raw),
-    { bones, bindings, drawOrder, layerSettings, castShadows, eyes, gates, semantics, morphs } = rigData.parse(raw)
+    { bones, bindings, drawOrder, layerSettings, castShadows, eyes, gates, semantics, morphs, headCalibration } = rigData.parse(raw)
   if (caps.guidance)
     for (const c of caps.guidance.conditions)
       if (c.ranges?.length) gates.push({ slot: c.slot, from: c.from, to: c.to, ranges: c.ranges })
@@ -627,13 +629,18 @@ export function createRig(manifest: SliceManifest, raw: unknown) {
         const restWorldRef = fieldCheck?.restWorld ?? surface?.restWorld
         if (!restWorldRef) continue
         const d = byId.get(part.layerId)?.deformer
+        const isChain = Boolean(surface?.chain)
+        const matrixDet = part.matrix[0] * part.matrix[3] - part.matrix[1] * part.matrix[2]
+        const baseRatio = fieldCheck?.minRatio ?? d?.minRatio ?? 0.01
+        const baseMinArea = d?.minArea ?? 1e-8
+        const scaleFactor = !isChain && matrixDet > 0 ? matrixDet : 1
         try {
           checkGeometry(
             restWorldRef,
             worldVertices(g.vertices, part.matrix),
             g.indices,
-            d?.minArea ?? 1e-8,
-            fieldCheck?.minRatio ?? d?.minRatio ?? 0.01,
+            baseMinArea * Math.min(1, scaleFactor),
+            baseRatio * scaleFactor,
           )
         } catch (error) {
           if (error instanceof GeometryError)
@@ -667,6 +674,7 @@ export function createRig(manifest: SliceManifest, raw: unknown) {
     eyes,
     gates,
     defaultSlots,
+    headCalibration,
     pose,
   }
 }

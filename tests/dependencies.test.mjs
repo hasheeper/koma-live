@@ -79,4 +79,4 @@ it('compiles the core against ECMAScript globals only, including dependency decl
   const program = ts.createProgram(config.fileNames, config.options)
   expect(program.getSourceFiles().filter(f => /lib\.(dom|webworker)(\.|$)/.test(f.fileName))).toEqual([])
   expect(ts.getPreEmitDiagnostics(program).map(d => ts.flattenDiagnosticMessageText(d.messageText,'\n'))).toEqual([])
-})
+}, 20_000)

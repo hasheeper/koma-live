@@ -167,9 +167,15 @@ function solveTwoBoneIK(rootX, rootY, targetX, targetY, L1, L2, bendSign) {
 - **完整闭缝眨眼桥接（Blink-Bridged Expression Swap）**：
   - 离散切换差分眼（如 `default ↔ sleepy / star_eyes / abyss`）时，绝不硬闪切，也不能只闭到 `scaleY ≈ 0.3` 就过早切图（肉眼会看到“突然闭眼少了一截”的断层）。
   - 正确做法：用分段单调下压把眼球内部一直压成约 `3 px` 细缝（`scaleY → 0.055`），并把 `eye_white / pupil / eye_lash` 的闭合收束锚点精准对齐到闭眼线 `Y` 坐标，直到 **`eyeClose >= 0.975`** 的最闭瞬间才切入目标差分贴图；推荐桥接时长 **`135 ms 闭合 + 75 ms 闭缝停顿 + 200 ms 舒缓睁开`**。切入差分眼后依然保持活体周期眨眼与局部视线微动。
+- **原生分层眼优先于模糊放大差分（`clipTo: 'eye_white'` 半睁/瞪大）**：
+  - 对半睁死鱼眼、好奇微睁等只需调整眼睑开合的表情，优先直接驱动高解析原生分层眼，并将 **`pupil` 与 `eye_highlight` 同时配置 `clipTo: 'eye_white'`**；压低 `eye_white_bone` 顶端缩放并同步下移/拉平 `eye_lash`，即可让正圆虹膜被上眼睑锐利切出半睁感，既免去 2× 放大差分的模糊感与闪烁切换，又能保持完整实时瞳孔追踪与上睑投影。
+- **双层唇心弹性嘴型渐变（消除 1 帧硬切）**：
+  - 若把所有嘴型塞进单个互斥 `mouth_expr` 槽，切换必是 1 帧硬切。改为保留默认嘴常显（由 `opacity` 控制），其余扩展嘴型各挂独立开关槽（`none | on`）；切嘴时执行 ~`175 ms` 双层唇心弹性过渡——旧嘴先向共享唇心 `(LIP_CX, LIP_CY)` 轻抿收合（`scaleY → 0.34`）淡出，新嘴从同一唇心平滑舒展并带轻微弹性过冲（`scaleY: 0.32 → 1.09 → 1.0`），兼得丝滑过渡与零双嘴重影。
+- **克制触感互动与程序化渐进粒子**：
+  - 摸头类互动切忌夸张大晃或把头部压成橡皮球：让发冠 `hair_crown` 随抚摸落点做 `≤ 7.5 px` 细腻轻压、呆毛根部贴合下沉并在 `evalSkullFollow` 同步内收后发帽沿防露馅；爱心/星光等反馈优先在同轴 `front` 2D 层用程序化手绘粒子按持续交互渐进递增并设上限阈值（如最多 9 颗）自然飘散，远比机械循环的 APNG 更鲜活。
 
-### 2.5 代码原生顶点变形口（`deform`）、三轴微视差与多层薄纱
-当单靠骨骼或骨链难以表现**丝带尾梢飘动、水母伞盖波动、多层纱裙褶皱、三轴微视差转头**时，直接在 `setPose({ bones, deform })` 叠加位移场：
+### 2.5 代码原生顶点变形口（`deform`）、解析式 2.5D 头转与多层薄纱
+当单靠骨骼或骨链难以表现**丝带尾梢飘动、水母伞盖波动、多层纱裙褶皱、三轴微视差转头**时，直接在 `setPose({ bones, deform })` 叠加位移场；对精致人型角色推荐用 `npm run rig -- auto-head` + `head-rig.json` 生成带 `faceRelief`（面部球面浮雕）、分层五官 `zRatio`、`eyePairCenters`（眼睑-虹膜水平视差）、`crownDome`（径向球面圆润发冠，确保任意仰俯外轮廓不发方）与刚体 3D `horn` 旋转的 2.5D 头部 Morph，再用 `ctx.physics.projectHeadAccessory(puppet.spec.headCalibration, headYaw, headPitch, x, y, z)` 同步脑后蝴蝶结/头饰。
 
 - **三轴微视差安全红线与 6 层 Z 杠杆**：
   - 严格守住 **Yaw `±8°~12°`（简鼻二次元上限 `±15°`）、Pitch `+6°` ~ `-10°`、Roll `±8°~15°`**，以深度错位替代强行透视拉扯。

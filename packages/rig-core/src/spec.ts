@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { capabilitiesSchema } from './agent.js'
 import { point } from './geometry.js'
 import { createRig } from './pose.js'
+import { headCalibrationSchema } from './head-morph.js'
 import { sliceManifestSchema, type SliceManifest } from './slices.js'
 
 const id = z.string().min(1)
@@ -58,6 +59,7 @@ export const rigSpecSchema = z.strictObject({
       }),
     )
     .optional(),
+  headCalibration: headCalibrationSchema.optional(),
 })
 export type RigSpec = z.infer<typeof rigSpecSchema>
 
@@ -126,5 +128,6 @@ export function exportRigSpec(manifestInput: SliceManifest | unknown, raw: unkno
     layers,
     slots: model.caps.slots,
     ...(parameters ? { parameters } : {}),
+    ...(model.headCalibration ? { headCalibration: model.headCalibration } : {}),
   })
 }

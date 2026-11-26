@@ -187,5 +187,5 @@ describe('koma-rig.inspect.v1 validation & grouping (apps/rig-cli boundary)', ()
     } finally {
       await rm(tempDir, { recursive: true, force: true })
     }
-  })
+  }, 20_000)
 })

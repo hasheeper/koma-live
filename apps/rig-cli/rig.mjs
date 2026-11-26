@@ -1,22 +1,43 @@
 import { existsSync } from 'node:fs'
-import { spawnSync } from 'node:child_process'
-import { fileURLToPath } from 'node:url'
 import { mkdir, readdir, readFile } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 import { assetCommand } from './assets.mjs'
+import { runAuditMotion } from './audit-motion.mjs'
 import { parseExportWorkArgs, runExportWork } from './export-work.mjs'
+import { runAutoHead } from './head-tools.mjs'
 import { parseAutoMeshArgs, parseCheckBendArgs, runAutoMesh, runCheckBend } from './mesh-tools.mjs'
+import { runBakeReference, runDoctor, runPadSlice, runReorder, runRepivot } from './rig-tools.mjs'
 import { workspace, writeJson } from './workspace.mjs'
 import { auditMotions, capabilitiesJsonSchema, createPlayer, createRig, editRig, emptyRig, exportCapabilities, exportRigSpec, sliceManifestSchema, validateMotion } from '@koma-rig/rig-core'
 
 async function main() {
   const [command, file, target, ...extra] = process.argv.slice(2)
-  if (command === 'bake-head') {
-    const tool = fileURLToPath(new URL('../../tools/head-bake/', import.meta.url))
-    const python = process.env.KOMA_HEAD_BAKE_PYTHON || join(tool, '.venv', process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python')
-    const child = spawnSync(python, [join(tool, 'bake_tha3.py'), ...process.argv.slice(3)], { stdio: 'inherit' })
-    if (child.error) throw child.error
-    process.exitCode = child.status ?? 1
+  if (command === 'auto-head') {
+    console.log(JSON.stringify(await runAutoHead(process.argv.slice(3)), null, 2))
+    return
+  }
+  if (command === 'doctor') {
+    console.log(JSON.stringify(await runDoctor(process.argv.slice(3)), null, 2))
+    return
+  }
+  if (command === 'repivot') {
+    console.log(JSON.stringify(await runRepivot(process.argv.slice(3)), null, 2))
+    return
+  }
+  if (command === 'pad-slice') {
+    console.log(JSON.stringify(await runPadSlice(process.argv.slice(3)), null, 2))
+    return
+  }
+  if (command === 'bake-reference') {
+    console.log(JSON.stringify(await runBakeReference(process.argv.slice(3)), null, 2))
+    return
+  }
+  if (command === 'reorder') {
+    console.log(JSON.stringify(await runReorder(process.argv.slice(3)), null, 2))
+    return
+  }
+  if (command === 'audit-motion') {
+    console.log(JSON.stringify(await runAuditMotion(process.argv.slice(3)), null, 2))
     return
   }
   if (command === 'auto-mesh') {

@@ -74,6 +74,13 @@ it('validates axes, references, data dimensions, finite values and posed triangl
   const bad = createRig(manifest,document([{...morph,deltas:[null,null,shape(-180,0)]}]))
   expect(() => bad.pose({yaw:1,pitch:0})).toThrow(GeometryError)
   expect(() => bad.pose({yaw:1,pitch:0},undefined,{},0,{}, {},undefined,{validateGeometry:false})).not.toThrow()
+  // Uniform single-bone blink squash (e.g. 0.04x0.04) should not false-alarm a valid Morph
+  const rigged = editRig(manifest, document([morph]), [
+    { op: 'add-bone', boneId: 'eye', start: [16, 56], end: [128, 56] },
+    { op: 'bind', layerId: 'strip', boneId: 'eye' },
+  ])
+  const eyeRig = createRig(manifest, rigged)
+  expect(() => eyeRig.pose({ yaw: 1, pitch: 0 }, undefined, {}, 0, {}, { eye: { scaleX: 0.02, scaleY: 0.02 } })).not.toThrow()
 })
 
 it('retains a posed ribbon when adding a finer Morph surface', () => {

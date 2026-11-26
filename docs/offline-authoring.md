@@ -37,9 +37,9 @@ npm run rig -- sample "$work/strip/rig.json" tests/fixtures/chain-strip/motions/
 
 `sample` 与 `render` 在姿势求值后自动执行三角形翻面、退化与自交体检，报错直接定位部件、毫秒与三角形索引。
 
-## 骨链轮廓网格批量生成与安全角体检
+## 骨链网格、2.5D 头部 Morph、结构与力学体检
 
-完成 `boneChain` 绑定后，可用零额外依赖的 CLI 工具批量生成防翻面轮廓网格，并在编写实时演出脚本前扫描每条骨链的正负极限无翻面安全转角（均同时支持 `koma-work.json` 作品根目录或切片目录）：
+完成 `boneChain` 绑定后，可用零额外依赖的 CLI 工具批量生成防翻面轮廓网格、解析式 2.5D 头部 Morph，并在视觉审片前先跑纯 Node 结构体检与力学体检（均同时支持 `koma-work.json` 作品根目录或切片目录）：
 
 ```sh
 # 默认仅为缺网格的 boneChain 图层生成低凹度防翻面轮廓网格（detail:28, concavity:10, padding:4）
@@ -48,6 +48,23 @@ npm run rig -- auto-mesh <你的作品或切片目录>
 
 # 扫描所有 boneChain 逐节与联动最大无翻面转角，低于阈值自动标记 warn
 npm run rig -- check-bend <你的作品或切片目录> --max-angle 75 --warn-below 18
+
+# 零外部依赖生成 2.5D 头部九姿态 Morph（支持 faceRelief 面部浮雕、crownDome 球面圆润发冠、刚体 horn 旋转与眼窝视差，
+# 自动写入 headCalibration 并内置 25 点真实姿势校验）
+npm run rig -- auto-head <你的作品或切片目录> --dry-run
+npm run rig -- auto-head <你的作品或切片目录> [--config head-rig.json]
+
+# 骨架与绑定结构体检（查静止像素漂移、偏离枢轴、孤立骨骼、未绑图层与 Morph/槽位健康度）
+npm run rig -- doctor <你的作品或切片目录>
+
+# 纯 Node 秒级力学与几何巡检（遍历演出脚本全部 states，查 GeometryError、待机/转头突变、卡墙僵直与反惯性）
+npm run rig -- audit-motion <你的作品目录>
+
+# 零漂移维护工具：原地移枢轴、扩边切片自动校准 restOffset、调整绘制顺序、纯 Node 烘焙 sRGB PMA reference.png
+npm run rig -- repivot <目录> <boneId> <x> <y> [--keep-end]
+npm run rig -- pad-slice <目录> <layerId> [--left n] [--right n] [--top n] [--bottom n] [--bleed]
+npm run rig -- reorder <目录> <layerId> --before <targetId> | --after <targetId>
+npm run rig -- bake-reference <目录>
 ```
 
 若源 PSD 存在角落孤立脏点或整画布低透明雾噪，可直接单命令去噪并烘焙干净 `reference.png`（内置 0 误差复验并输出逐层清理 JSON 报告）：
@@ -61,14 +78,15 @@ uv run --locked --project tools/psd python -m layer_rig_psd.slices character.psd
 | 操作 | 输入与效果 |
 |---|---|
 | `add-bone` | 输入 `boneId` 和画布终点 `end`。根骨另给 `start`；选定 `parentBoneId` 时默认从其尖端创建，`snap: false` 配合 `start` 可建有偏移的子骨。起终点一致得到点关节。 |
-| `place-bone` | 用画布坐标 `start/end` 移动骨身或调整尖端，自动重算附着图层的静止偏移。 |
+| `place-bone`、`repivot-bone` | `place-bone` 用画布坐标 `start/end` 移动骨身或调整尖端；`repivot-bone` 按画布坐标 `pivot` 原地重设旋转枢轴（可选 `keepEnd`），均自动重算附着图层的静止偏移保持 0 px 漂移。 |
 | `edit-bone`、`reparent`、`remove-bone` | `edit-bone` 编辑名称、父空间起点、静止角度、长度及可选驱动系数；`reparent` 重算局部坐标以保留骨骼静止世界位置（父级填 `null` 设为根骨）；`remove-bone` 删除无引用的骨骼，若仍被子骨或图层引用则原子报错。 |
 | `bind`、`bind-chain`、`unbind` | 分别绑定单骨（`boneId`）、连续母子骨链（`boneChain` 与可选 `jointSoftnessPx`）或解绑；均在静止姿势按世界矩阵重算偏移，保留原有轮廓网格与设置。 |
-| `set-layer` | 设置图层 `locked` 或 `visible`。锁定保护绑定与网格编辑，骨架仍可带动它运动；隐藏层从最终姿势隐藏。 |
+| `set-layer` | 设置图层 `locked`、`visible`、`peekOpacity`、`peekAfter` 或 `clipTo`。锁定保护绑定与网格编辑，骨架仍可带动它运动；隐藏层从最终姿势隐藏。 |
 | `draw-order` | `layers` 给出由后至前的完整图层 ID 列表；同深度组（`gelGroups`）成员须保持连续且维持校准覆盖优先级。 |
 | `set-mesh` | 指定 `layerId` 与切片局部像素坐标 `mesh: { points, indices }`；填 `null` 清除自定义轮廓网格还原为矩形图像。 |
 | `set-parameter`、`remove-parameter` | 可选的离线语义参数增改删（删除仍被引用的参数会原子报错）；仅在需要静态动作或局部变形器时使用。 |
 | `create-ffd`、`ffd-point`、`set-deformer` | 可选的局部变形器（`3×3` / `4×4` FFD 晶格或 Ribbon 条带）创建、调点与移除（填 `null`）。[变形器求值](../packages/rig-core/src/geometry.ts) |
+| `set-morphs`、`set-head-calibration` | `set-morphs` 写入或替换声明式 1D/2D 参数化网格 Morph 列表（传入空数组清除）；`set-head-calibration` 持久化单源头部 3D 校准参数（中心点与 Yaw/Pitch 角度，传 `null` 清除）。轻度 2.5D 头转推荐使用 `rig auto-head` 自动生成。[Morph 生成器](../packages/rig-core/src/head-morph.ts) |
 
 `preview` 接受临时的 `bones`（完整 TRS：`{ x?, y?, rotation?, scaleX?, scaleY? }`）、`rotations` 与 `parameters`，返回骨骼实时起终点、矩阵与部件几何。[编辑操作 Schema](../packages/rig-core/src/authoring.ts)
 

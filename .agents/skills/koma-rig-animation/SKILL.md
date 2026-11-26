@@ -34,9 +34,9 @@ description: >-
 | 阶段 | 核心工具 | 能力范围 |
 |---|---|---|
 | **离线切片** | `tools/psd` (`layer_rig_psd.slices`) | 8-bit RGB PSD 导 v2 sRGB PMA 切片包；`--trim-stray --skip-hidden --bake-reference` 去孤立噪点/雾噪、烘焙并 0 误差复验 `reference.png`。 |
-| **绑骨与网格** | **Koma Studio** / `npm run rig` | 骨骼树、单骨与连续骨链（`boneChain`）自动权重蒙皮、关节柔化（`jointSoftnessPx`）、轮廓网格（`rig auto-mesh`）、骨链安全转角体检（`rig check-bend`）、透发（`peekOpacity/peekAfter`）、通用 Alpha 裁切（`clipTo`）、导出 `rig-spec.json`（`rig spec`）与无痛降采发布包（`rig export-work --scale 0.5`）。 |
-| **实时演出** | **Koma Live** / `mountPerformance` / `mountLiveRig` | PixiJS WebGL 角色渲染（常规层 `rgba8unorm`、`gelGroups` `rgba16float`）、代码原生顶点变形口（`deform`）、逐层运行期 `opacity / tint / clipTo`、播放态高性能开关（`validateGeometry` 默认 `false`）、同轴 2D 前后景（支持 `layerResolutionScale` 半分辨率）与零改脚本 `manifest.textureScale`。 |
-| **视觉验收** | `npm run inspect:live` | 无头 Chromium 确定性采样（强制开启 `validateGeometry: true` 全量几何体检），自由拼装关键帧条、Spine 洋葱皮、局部裁剪、Alpha 通道与跨视口对比板，输出 `telemetry.json`。 |
+| **绑骨与网格** | **Koma Studio** / `npm run rig` | 骨骼树、单骨与连续骨链（`boneChain`）自动权重蒙皮、关节柔化（`jointSoftnessPx`）、轮廓网格（`rig auto-mesh`）、骨链安全转角体检（`rig check-bend`）、3D 头部网格（`rig auto-head`，自动持久化 `headCalibration`）、结构巡检与切片工具（`rig doctor / repivot / pad-slice / reorder / bake-reference`）、透发（`peekOpacity/peekAfter`）、通用 Alpha 裁切（`clipTo`）、导出 `rig-spec.json`（`rig spec`）与无痛降采发布包（`rig export-work --scale 0.5`）。 |
+| **实时演出** | **Koma Live** / `mountPerformance` / `mountLiveRig` | PixiJS WebGL 角色渲染（常规层 `rgba8unorm`、`gelGroups` `rgba16float`）、代码原生顶点变形口（`deform`）、内置画布坐标物理原语（`ctx.physics`：`softClamp / createLowPass / createDampedSpring / createHairStrand / createWeldedMeshField / projectHeadAccessory`）、逐层运行期 `opacity / tint / clipTo`、播放态高性能开关（`validateGeometry` 默认 `false`）、同轴 2D 前后景（支持 `layerResolutionScale` 半分辨率）、贴图/清单/脚本全量自动热重载与零改脚本 `manifest.textureScale`。 |
+| **视觉验收** | `rig audit-motion` / `npm run inspect:live` | `rig audit-motion` 纯 Node 秒级无头体检（自动查 `GeometryError`、帧间突变、骨骼卡墙跳变与反惯性钢板感）；`inspect:live` 无头 Chromium 确定性采样（支持 `--dpr 1 --step 33.33` 重型角色提速），自由拼装关键帧条、Spine 洋葱皮、局部裁剪、Alpha 通道与跨视口对比板，输出 `telemetry.json`。 |
 
 **与 Spine / Live2D 的机制差异**：
 - Koma 以 **骨骼 TRS + 骨链自动蒙皮 + 轮廓网格 + `deform` 网格场 + 逐层 `opacity / tint / clipTo`** 为核心，不在 Studio 堆砌全局参数表单与手工时间轴；连续动力学状态场让呼吸、微风与弹簧动量在任意状态切换和触发时自然延续。

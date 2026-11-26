@@ -143,22 +143,20 @@ export async function liveWorkFromSource(
   const allAssetFullPaths = new Set<string>([...fullByRel.values(), fallbackPosterFull])
   if (explicitPosterFull) allAssetFullPaths.add(explicitPosterFull)
 
-  const watchedPaths = [layout.workPath, manifestPath, layout.performancePath].filter(
-    (p): p is string => Boolean(p),
+  const watchedPaths = Array.from(
+    new Set([
+      ...[layout.workPath, manifestPath, layout.performancePath].filter((p): p is string => Boolean(p)),
+      ...(overrideRig === undefined ? [rigPath, setupPath] : []),
+      ...allAssetFullPaths,
+    ]),
   )
-  if (overrideRig === undefined) {
-    watchedPaths.push(rigPath, setupPath)
-  }
 
   let assetStats: Record<string, FileSnapshot | null> = {}
   let watchedSig = ''
   if (source.statFiles) {
-    const statList = Array.from(new Set([...watchedPaths, ...allAssetFullPaths]))
-    const allStats = await source.statFiles(statList)
+    const allStats = await source.statFiles(watchedPaths)
     assetStats = allStats
-    const watchedSubset: Record<string, FileSnapshot | null> = {}
-    for (const p of watchedPaths) watchedSubset[p] = allStats[p] ?? null
-    watchedSig = snapshotSignature(watchedSubset)
+    watchedSig = snapshotSignature(allStats)
   }
 
   const nextCache: AssetCache = new Map()

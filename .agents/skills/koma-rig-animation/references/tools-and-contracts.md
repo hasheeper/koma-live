@@ -39,6 +39,19 @@ npm run rig -- auto-mesh <作品或切片目录>
 # 扫描全部 boneChain 逐节与联动的最大无翻面转角，低于 warn-below 自动标 warn
 npm run rig -- check-bend <作品或切片目录> --max-angle 75 --warn-below 18
 
+# 零外部依赖生成 2.5D 头部九姿态 Morph（自动写入 headCalibration 并跑 25 点真实姿势校验）
+npm run rig -- auto-head <作品或切片目录> [--config head-rig.json] [--dry-run]
+
+# 结构体检与纯 Node 秒级力学预检
+npm run rig -- doctor <作品或切片目录>
+npm run rig -- audit-motion <作品目录>
+
+# 零漂移修骨/扩边/调序/烘焙参考图（纯 Node 无需 Python）
+npm run rig -- repivot <作品或切片目录> <boneId> <x> <y> [--keep-end]
+npm run rig -- pad-slice <作品或切片目录> <layerId> [--left n] [--right n] [--top n] [--bottom n] [--bleed]
+npm run rig -- reorder <作品或切片目录> <layerId> --before <targetId> | --after <targetId>
+npm run rig -- bake-reference <作品或切片目录>
+
 # 批量应用 RigEdit JSON 操作数组并保存
 npm run rig -- edit <切片目录> edits.json
 npm run rig -- save <切片目录>
@@ -100,6 +113,11 @@ interface RigSpec {
     hasMesh: boolean
   }>
   slots: Array<{ slot: string; states: string[]; default: string }>
+  headCalibration?: {
+    center: [number, number]
+    yaw: { id: string; deg: number }
+    pitch: { id: string; upDeg: number; downDeg: number }
+  }
 }
 ```
 
@@ -203,7 +221,7 @@ interface MountPerformanceOptions {
 
 `const pose = puppet.setPose(...)` 返回实时世界坐标 `pose.bones`（`start`, `end`, `matrix`）与 `pose.parts`（`pivot`, `matrix`, `visible`）——前后景特效直接锚定 `pose`，不手算二次矩阵。
 
-**参数化头转。** 在 `semantics.parameters` 声明 `headYaw` 和 `headPitch` 后，演出可用 `puppet.setPose({ parameters: {headYaw, headPitch}, bones, deform, slots })` 驱动烘焙在 `rig.json.morphs` 的位移。单文件脚本管理眨眼与惯性。每次 `setPose` 后，`puppet.projectRestPoint(layerId, [原画布X, 原画布Y])` 可定位实际变形后的眼部高光等附着点。接口读取与 WebGL 相同的三角面。[数据契约](../../../../docs/rig-spec.md) · [烘焙命令](../../../../tools/head-bake/README.md)
+**参数化头转。** 使用纯 TS 零依赖的 `npm run rig -- auto-head <作品目录> [--config head-rig.json]` 在 `rig.json.morphs` 自动生成九姿态轻度 2.5D 头转并声明 `headYaw` / `headPitch`，演出通过 `puppet.setPose({ parameters: {headYaw, headPitch}, bones, deform, slots })` 驱动；单文件脚本管理眨眼与惯性。每次 `setPose` 后，`puppet.projectRestPoint(layerId, [原画布X, 原画布Y])` 可定位实际变形后的眼部高光等附着点。[数据契约](../../../../docs/rig-spec.md) · [离线装配命令](../../../../docs/offline-authoring.md)
 
 ### 3.2 `mountPerformance` 四条运行护栏
 

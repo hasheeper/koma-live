@@ -74,7 +74,8 @@ export async function workspace(command, dir, argument, validateCandidate) {
     if (command === 'edit' || command === 'edit-save') {
       if (validateCandidate && digest(jsonBytes(rig)) !== state.clean)
         throw new Error('已有未保存草稿，请先保存或另存草稿再烘焙')
-      rig = editRig(manifest, rig, JSON.parse(await readFile(argument)))
+      const edits = Array.isArray(argument) ? argument : JSON.parse(await readFile(argument))
+      rig = editRig(manifest, rig, edits)
       state.history.splice(++state.index, Infinity, rig)
     } else if (command === 'undo' || command === 'redo') {
       const next = state.index + (command === 'undo' ? -1 : 1)

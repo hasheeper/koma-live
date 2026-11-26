@@ -24,9 +24,9 @@
 **Koma Live** 是面向「精绘分层立绘 + 前端程序化代码美术」工作流的纯本地 2D 活立绘平台，内置 **Koma Rig** 绑骨底盘，将离线切片核验、骨架网格校准、实时演出预览与解耦 WebGL 运行时收拢在同一套确定性求值内核之上：
 
 - **双工作台一体**：顶栏一键在 **Koma Rig**（绑骨、骨链蒙皮、轮廓网格与试动）与 **Koma Live**（全幅纯净活立绘展示、状态互动、热重载与同轴审查）间互切，切换时自动保活当前作品与演出状态。
-- **代码原生软体与骨骼全驱动**：向实时演出脚本完整开放骨骼 **TRS（平移 / 旋转 / 缩放）**、差分槽、ACGN **透发渲染（`peekOpacity` / `peekAfter`）** 与 **M4 代码原生顶点变形口（`deform` Mesh Field）**，兼顾刚体机械与发丝、水母伞、裙摆等软体流体动效。
+- **代码原生软体与骨骼全驱动**：向实时演出脚本完整开放骨骼 **TRS（平移 / 旋转 / 缩放）**、差分槽、ACGN **透发渲染（`peekOpacity` / `peekAfter`）**、通用 Alpha 裁切（`clipTo`）、内置画布坐标物理原语（`ctx.physics`）与 **M4 代码原生顶点变形口（`deform` Mesh Field）**，兼顾刚体机械与发丝、水母伞、裙摆等软体流体动效。
 - **像 Spine / Live2D 一样解耦接入**：独立构建的零编辑器依赖运行时 `player.js` 配合 `rig export-work` 一键导出只读展示包；宿主网页或游戏仅通过 `mountPerformance` 发送语义状态与触发器，零侵入业务代码，支持原生静态图无痕降级。
-- **AI 协作与审片闭环**：自带单文件自包含演出契约（`koma-rig.performance.v1`）与 [Agent 演出技能](.agents/skills/koma-rig-animation/SKILL.md)，结合 `rig spec`、`rig check-bend` 与无头 Chromium 审片器 `inspect:live`，实现“绑骨 → 编写物理演出 → 多帧洋葱皮与轨迹验收”的自动化闭环。
+- **AI 协作与审片闭环**：自带单文件自包含演出契约（`koma-rig.performance.v1`）与 [Agent 演出技能](.agents/skills/koma-rig-animation/SKILL.md)，结合 `rig doctor`、`rig auto-head`、`rig check-bend`、`rig audit-motion` 与无头 Chromium 审片器 `inspect:live`，实现“绑骨 → 2.5D 头部网格生成 → 编写物理演出 → 秒级力学体检与多帧视觉验收”的自动化闭环。
 - **与 [Koma Image](https://github.com/hasheeper/koma-image) 无缝衔接**：上游可在 **[Koma Image](https://github.com/hasheeper/koma-image)**（[在线体验](https://koma-image.pages.dev/)）的 **EDIT → Koma Layer** 分层工坊中直接将静帧定稿自动拆层、局部补画并导出 `koma-rig.slices.v2` 切片包或分层 PSD，拖入 **Koma Rig / Koma Live** 即可开绑与实时演出。
 - **纯本地工作流**：无云端账号与业务后台，切片、骨架与脚本全部留在本地目录；工作台通过目录句柄与 IndexedDB 记忆最近打开项目，支持原位保存与外部编辑自动热重载。
 
@@ -56,8 +56,8 @@
 
 - **上游分层直连（[Koma Image · Koma Layer](https://github.com/hasheeper/koma-image/blob/main/docs/workspaces/layer.md)）**：若源稿为平面定稿，可先在兄弟项目 [Koma Image](https://github.com/hasheeper/koma-image)（[在线体验](https://koma-image.pages.dev/)）的 **Koma Layer** 中完成 AI 自动拆层、蓝橙局部补画与 Photopea 精修，直接导出本平台原生的 `koma-rig.slices.v2` 切片包或分层 PSD。
 - **PSD 去噪切图与像素复验（`tools/psd`）**：Python 离线脚本从分层 PSD 导出 `koma-rig.slices.v2` 切片包，支持 `--trim-stray` 剔除孤立雾噪、`--skip-hidden` 跳过隐藏参考层、`--bake-reference` 按 sRGB PMA 烘焙干净参考图，并通过 `rig verify-slices` 做逐像素 0 误差复验。
-- **骨架与网格 CLI 体检（`apps/rig-cli`）**：`rig spec` 导出驱动清单、`rig auto-mesh` 按 Alpha 轮廓批量生成安全轮廓网格、`rig check-bend` 扫描全部骨链的安全转角边界、`rig export-work` 一键纯净导出只读展示包。
-- **无头动帧审片器（`inspect:live`）**：用固定步确定性采样 `stepTo(timeMs)` 在真实 WebGL 中抓取多时刻条带、局部特写、洋葱皮、运动弧线与骨骼叠加拼图，便于人工与 AI 逐帧核验穿帮与物理传导。
+- **骨架、头部 Morph 与 CLI 体检（`apps/rig-cli`）**：`rig spec` 导出驱动清单、`rig auto-mesh` 按 Alpha 轮廓批量生成安全轮廓网格、`rig auto-head` 纯 TS 零依赖生成 2.5D 头部九姿态 Morph 与单源 `headCalibration`、`rig doctor / check-bend / audit-motion` 执行结构与物理秒级体检、`rig repivot / pad-slice / reorder / bake-reference` 零漂移维护切片与骨架、`rig export-work` 一键纯净导出只读展示包。
+- **无头动帧审片器（`inspect:live`）**：用固定步确定性采样 `stepTo(timeMs)` 在真实 WebGL 中抓取多时刻条带、局部特写、洋葱皮、运动弧线与骨骼叠加拼图（重型角色支持 `--dpr 1 --step 33.33` 提速），便于人工与 AI 逐帧核验穿帮与物理传导。
 
 <a id="前端接入"></a>
 
@@ -164,10 +164,10 @@ Claude Code、Codex、Antigravity 等具备本地文件与命令行能力的 Cod
 
 | 模块 | 职责 | 依赖约束 |
 | --- | --- | --- |
-| `packages/rig-core` | 切片／骨架／作品契约校验、FK 骨骼与骨链蒙皮求值、M4 `deform` 细分与几何防翻面／自交校验 | 仅 `zod`；纯 ES2022，零 DOM、零 WebGL、零渲染依赖 |
+| `packages/rig-core` | 切片／骨架／作品契约校验、FK 骨骼与骨链蒙皮求值、解析式 2.5D 头部 Morph、内置物理工具包、结构体检（`doctor`）、M4 `deform` 细分与几何防翻面／自交校验 | 仅 `zod`；纯 ES2022，零 DOM、零 WebGL、零渲染依赖 |
 | `packages/rig-renderer` | PixiJS v8 WebGL PMA / Knockout / 透发渲染与 `mountPerformance` / `mountLiveRig` 独立运行时 | 依赖 `rig-core` 与 `pixi.js`；严格禁止引入 Vue、Tweakpane 或编辑器模块 |
 | `apps/rig-studio` | **Koma Rig** 绑骨台与 **Koma Live** 动帧工坊前端（可静态部署 `apps/rig-studio/dist/`） | Vue 3 + Vite；与运行时产物彻底分离 |
-| `apps/rig-cli` | 离线 `rig` 命令行（`verify-slices / spec / auto-mesh / check-bend / export-work`）与无头 `inspect:live` 审片器 | Node.js 原生 API + `rig-core`；零额外运行依赖 |
+| `apps/rig-cli` | 离线 `rig` 命令行（`verify-slices / spec / auto-mesh / auto-head / check-bend / doctor / audit-motion / repivot / pad-slice / reorder / bake-reference / export-work`）与无头 `inspect:live` 审片器 | Node.js 原生 API + `rig-core`；零额外运行依赖 |
 | `tools/psd` | 离线 PSD 分层切片导出、孤立噪点剔除、PMA 参考图烘焙与像素级差异核验 | Python 3.11+、`uv`、`psd-tools`、`Pillow`、`numpy` |
 
 ## 🔒 纯本地存储与隐私
@@ -217,9 +217,13 @@ uv run --locked --project tools/psd python -m unittest discover -s tools/psd/tes
 | `npm run build:runtime` | 构建零编辑器依赖独立前端运行时 `packages/rig-renderer/dist/runtime/player.js` |
 | `npm run rig -- spec <目录> [输出.json]` | 导出供程序化脚本与 AI 使用的 `rig-spec.json` 驱动清单 |
 | `npm run rig -- auto-mesh <目录> [--dry-run]` | 按 PNG Alpha 轮廓批量生成骨链安全轮廓网格 |
+| `npm run rig -- auto-head <目录> [--dry-run]` | 零外部依赖生成 2.5D 头部九姿态 Morph 并持久化 `headCalibration` |
+| `npm run rig -- doctor <目录>` | 全面体检静止偏移、偏离枢轴、未绑图层、孤立骨骼与 Morph 合法性 |
 | `npm run rig -- check-bend <目录>` | 扫描全部骨链的安全转角上限并报告翻面风险 |
+| `npm run rig -- audit-motion <目录>` | 纯 Node 秒级力学与几何巡检（查 `GeometryError`、突变、卡墙与反惯性） |
+| `npm run rig -- repivot / pad-slice / reorder / bake-reference` | 零漂移移动骨枢轴、无损扩边切片、调整层序与纯 Node 烘焙 sRGB PMA `reference.png` |
 | `npm run rig -- export-work <作品目录> <输出目录>` | 导出只读展示包（可选 `--scale 0.5` 降采省 4× 显存且零改脚本、`--runtime <目录>` 同步 SDK、`--no-poster`） |
-| `npm run inspect:live -- <作品> --times ...` | 无头 Chromium 固定步采样并合成多帧条带、洋葱皮与轨迹审片板 |
+| `npm run inspect:live -- <作品> --times ...` | 无头 Chromium 固定步采样并合成多帧条带、洋葱皮与轨迹审片板（支持 `--dpr 1 --step 33.33`） |
 
 <a id="文档导航"></a>
 

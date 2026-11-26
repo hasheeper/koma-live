@@ -44,6 +44,8 @@ function usage() {
     '  --arcs <bone.end,...>     绘制运动弧线与时间点阵（支持 .start/.end/.pivot）',
     '  --guides <y=867,x=285>    绘制水平/垂直参考线（可选 :标签，如 y=867:ground）',
     '  --crop <x,y,w,h>          局部逻辑坐标特写裁切',
+    '  --step <ms>               仿真步长毫秒（默认 16.67，快速体检可用 33.33）',
+    '  --dpr <1..2>              渲染像素倍率上限（默认 2，重型角色推荐 1 提速）',
     '  --channel <rgba|alpha>    画面通道（alpha 输出黑白通道检视图）',
     '  --bg <dark|light|checker|#hex> 画格底色',
     '  --bones / --mesh          叠加骨骼连线 / 网格三角线',

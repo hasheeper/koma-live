@@ -509,6 +509,7 @@ export function parseCliArgs(argv) {
   let poster
   let outDir
   let stepMs
+  let maxDpr
   let width
   let background = 'dark'
   let channel = 'rgba'
@@ -539,6 +540,7 @@ export function parseCliArgs(argv) {
     else if (arg === '--poster') { poster = nextVal(i++, arg) }
     else if (arg === '--out' || arg === '-o') { outDir = nextVal(i++, arg) }
     else if (arg === '--step') { stepMs = Number(nextVal(i++, arg)) }
+    else if (arg === '--dpr') { maxDpr = Number(nextVal(i++, arg)) }
     else if (arg === '--width') { width = Number(nextVal(i++, arg)) }
     else if (arg === '--bg' || arg === '--background') { background = nextVal(i++, arg) }
     else if (arg === '--channel') { channel = nextVal(i++, arg) }
@@ -641,6 +643,7 @@ export function parseCliArgs(argv) {
     format: 'koma-rig.inspect.v1',
     source: { work, rig, performance, poster },
     ...(stepMs !== undefined ? { stepMs } : {}),
+    ...(maxDpr !== undefined ? { maxDpr } : {}),
     outDir: outDir ?? '.tmp/inspect-live',
     exportTelemetry,
     exportFrames,

@@ -204,12 +204,12 @@ Agent 可以一次声明生成 **1 张或多张 PNG 审片板**；每张画板�
    ```sh
    npm run inspect:live -- ./examples/gbot/koma-work.json \
      --state gust --trigger flick@120 \
-     --times 0,120,220,340,520,800 \
+     --times 0,120,260,420,520,800 \
      --onion 120..620:8 --arcs tip.end \
-     --channel rgba \
+     --dpr 1 --step 33.33 --channel rgba \
      --out .tmp/inspect
    ```
-   同样支持直接传入目录路径（自动识别其中的 `koma-work.json` 或 `manifest.json` + `performance.js` + `setup.json`），或以 `--rig <dir> --script <file.js>` 运行任意本地开发目录。
+   同样支持直接传入目录路径（自动识别其中的 `koma-work.json` 或 `manifest.json` + `performance.js` + `setup.json`），或以 `--rig <dir> --script <file.js>` 运行任意本地开发目录；重型多图层角色可加 `--dpr 1 --step 33.33 --no-telemetry` 提速。在跑无头 Chromium 视觉审片前，建议先运行 `npm run rig -- audit-motion <作品目录>` 做纯 Node 秒级几何与物理预检。
 
 ---
 

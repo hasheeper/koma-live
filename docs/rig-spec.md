@@ -66,7 +66,7 @@
 {"layerId":"face","grid":[1,1],"axes":[{"parameter":"lift","samples":[0,1]}],"deltas":[null,[0,-2,0,-2,0,-2,0,-2]]}
 ```
 
-用 `set-morphs` 编辑操作替换整个列表，传入空数组可清除。演出脚本调用 `puppet.setPose({parameters: {lift: 0.5}})`。设计期的 `validateGeometry` 使用最终世界三角面，`minRatio` 可提高对应 Morph 的面积比门槛。[插值与校验](../packages/rig-core/src/morph.ts) · [离线头部烘焙](../tools/head-bake/README.md)
+用 `set-morphs` 编辑操作替换整个列表，传入空数组可清除；`set-head-calibration` 持久化头部 3D 校准参数（随 `exportRigSpec` 导出为 `rig-spec.json` 的 `headCalibration`，供演出脚本用 `ctx.physics.projectHeadAccessory` 同步驱动脑后头饰）。演出脚本调用 `puppet.setPose({parameters: {lift: 0.5}})`。设计期的 `validateGeometry` 使用最终世界三角面（单骨层按单骨行列式归一校验局部形变质量），`minRatio` 可提高对应 Morph 的面积比门槛。轻度 2.5D 头部九姿态可直接用零依赖的 `npm run rig -- auto-head` 生成（支持 `faceRelief` 面部浮雕、`crownDome` 径向球面圆润发冠、刚体 3D `horn` 旋转与 `eyePairCenters` 眼睑视差）。[插值与校验](../packages/rig-core/src/morph.ts) · [解析头部 Morph 生成器](../packages/rig-core/src/head-morph.ts) · [离线装配命令](offline-authoring.md)
 
 ## 4. 素材、图层身份与像素复原
 
@@ -102,5 +102,5 @@ Koma Rig 不再用死板的预设参数表去切碎动画或限制 AI 的表达�
 | **PSD 与像素复原** | 离线导出 v2 切片、原生 `lyid` 与 `groupTree`、同深度 `gelGroups`、`verify-slices` 逐像素预乘比对与差异热图、`reimport --map` 换图迁移。 |
 | **骨架与 TRS** | 建骨、吸附/`Alt` 偏移子骨、改名、改父级、设为根骨、删骨（引用拦截）、单骨/连续骨链自动蒙皮与柔化、完整骨骼 **TRS（平移·旋转·缩放）** 求值与继承。 |
 | **图层与轮廓网格** | 显隐、锁定、绘制顺序拖拽/微调（含 `gelGroups` 整组保护）、手绘轮廓、Alpha 自动描绘、顶点编辑/吸附、清除网格、`GeometryError` 画布标红高亮。 |
-| **实时运行时与 AI 清单** | `exportRigSpec`（`koma-rig.spec.v1`）与 `mountLiveRig`（独立构建入 `packages/rig-renderer/dist/runtime/player.js`，零编辑器依赖），支持静态目录 URL 或内存资产实时 TRS 驱动。 |
-| **离线 CLI 与归档** | `import / edit / undo / redo / save / preview / render / sample / audit / review / publish` 全链路可用；可选变形器（FFD / Ribbon）与静态动作兼容保留。 |
+| **实时运行时与 AI 清单** | `exportRigSpec`（`koma-rig.spec.v1`，含 `headCalibration`）、`mountPerformance` 内置物理原语 `ctx.physics`（[physics.ts](../packages/rig-core/src/physics.ts)）与 `mountLiveRig`（独立构建入 `packages/rig-renderer/dist/runtime/player.js`，零编辑器依赖），支持静态目录 URL 或内存资产实时 TRS 驱动。 |
+| **离线 CLI 与归档** | `import / edit / undo / redo / save / preview / render / sample / audit / review / publish` 全链路，以及零依赖结构与动效维护命令 `doctor / auto-mesh / auto-head / check-bend / audit-motion / repivot / pad-slice / reorder / bake-reference / export-work`；可选变形器（FFD / Ribbon）与静态动作兼容保留。 |

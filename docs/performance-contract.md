@@ -81,6 +81,8 @@ export interface PerformanceContext {
   puppet: LiveRigPlayer
   /** 永远等于 manifest.canvas 的 1:1 逻辑像素尺寸 */
   size: { width: number; height: number }
+  /** 内置画布坐标物理原语工具包（softClamp / createLowPass / createDampedSpring / createHairStrand / createWeldedMeshField / projectHeadAccessory） */
+  physics: PhysicsToolkit
   /** 与人偶画布严格 1:1 对齐的背景绘制槽（按 meta.layers.back 按需创建） */
   back?: PerformanceLayerSlot
   /** 与人偶画布严格 1:1 对齐的前景绘制槽（按 meta.layers.front 按需创建） */
@@ -187,6 +189,10 @@ export interface MountPerformanceOptions {
   stepMs?: number
   /** back/front 2D 槽物理像素缩放倍率上限（默认 2，兼顾 Retina 清晰度与显存占用） */
   maxDpr?: number
+  /** 同轴 2D back/front 画布缓冲分辨率倍率 (0, 1]（如 0.5 省 75% 像素填充率，逻辑坐标仍保持 1×） */
+  layerResolutionScale?: number
+  /** 是否每帧执行全量 checkGeometry 自交体检（播放态默认 false；inspect:live 与审查态为 true） */
+  validateGeometry?: boolean
   /**
    * 运行期异常（含 GeometryError）防护策略，默认 'pause'：
    * - 'pause'：保持上一有效帧，立即暂停时钟循环并触发一次 onError，防止 60fps 异常风暴；

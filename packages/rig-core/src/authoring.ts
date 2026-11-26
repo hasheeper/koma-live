@@ -1,11 +1,12 @@
 import { z } from 'zod'
 import { parameterSchema } from './agent.js'
+import { headCalibrationSchema } from './head-morph.js'
 import { layerMorphGridSchema } from './morph.js'
 import { attachmentMesh, deformer, point, prepareGeometry, type Point } from './geometry.js'
-import { bindingSchema, castShadowSchema, createRig, layerSetting, type Rig } from './pose.js'
+import { bindingSchema, castShadowSchema, createRig, layerSetting, type Binding, type Rig } from './pose.js'
 import { neutral, type Values } from './sampling.js'
-import { boneSchema, boneTransformSchema, prepareSkeleton, compose, direction, identity, inverse, transform } from './skeleton.js'
-import type { SliceManifest } from './slices.js'
+import { boneSchema, boneTransformSchema, prepareSkeleton, compose, direction, identity, inverse, transform, translate } from './skeleton.js'
+import type { PixelRect, SliceManifest } from './slices.js'
 
 const id = z.string().min(1)
 const layer = { layerId: id }
@@ -17,6 +18,7 @@ const documentSchema = z.looseObject({
   layerSettings: z.array(layerSetting).optional(),
   castShadows: z.array(castShadowSchema).optional(),
   morphs: z.array(layerMorphGridSchema).optional(),
+  headCalibration: headCalibrationSchema.optional(),
 })
 export const editSchema = z.discriminatedUnion('op', [
   z.strictObject({ op: z.literal('set-parameter'), parameter: parameterSchema }),
@@ -36,6 +38,7 @@ export const editSchema = z.discriminatedUnion('op', [
     changes: boneSchema.omit({ boneId: true, parentBoneId: true }).partial(),
   }),
   z.strictObject({ op: z.literal('place-bone'), boneId:id, start:point, end:point }),
+  z.strictObject({ op: z.literal('repivot-bone'), boneId: id, pivot: point, keepEnd: z.boolean().optional() }),
   z.strictObject({ op: z.literal('reparent'), boneId: id, parentBoneId: id.nullable() }),
   z.strictObject({ op: z.literal('remove-bone'), boneId: id }),
   z.strictObject({ op: z.literal('bind'), ...layer, boneId: id }),
@@ -58,8 +61,34 @@ export const editSchema = z.discriminatedUnion('op', [
   z.strictObject({ op: z.literal('set-deformer'), ...layer, deformer: deformer.nullable() }),
   z.strictObject({ op: z.literal('set-cast-shadows'), castShadows: z.array(castShadowSchema) }),
   z.strictObject({ op: z.literal('set-morphs'), morphs: z.array(layerMorphGridSchema) }),
+  z.strictObject({ op: z.literal('set-head-calibration'), headCalibration: headCalibrationSchema.nullable() }),
 ])
 export type RigEdit = z.infer<typeof editSchema>
+
+/**
+ * Recalibrate a layer binding when its slice rect changes (e.g. padding/bleeding or cropping a texture)
+ * so original painted pixels remain locked to their exact 0.0000 px rest canvas position.
+ */
+export function syncSliceBinding(binding: Binding, oldRect: PixelRect, newRect: PixelRect): Binding {
+  const [x0, y0] = oldRect
+  const [x1, y1] = newRect
+  const dx = x0 - x1
+  const dy = y0 - y1
+  const next: Binding = { ...binding }
+
+  if (binding.restOffset && binding.bindOrigin) {
+    const [bx0, by0] = binding.bindOrigin
+    next.restOffset = compose(binding.restOffset, translate(x1 - bx0, y1 - by0))
+    next.bindOrigin = [x1, y1]
+  }
+  if (binding.mesh && (dx !== 0 || dy !== 0)) {
+    next.mesh = {
+      ...binding.mesh,
+      points: binding.mesh.points.map(([px, py]): Point => [px + dx, py + dy]),
+    }
+  }
+  return next
+}
 
 export function emptyRig(rigId: string) {
   return { rigId: id.parse(rigId), rigVersion: 1, semantics: { parameters: [], slots: [] } }
@@ -93,20 +122,57 @@ export function editRig(manifest: SliceManifest, input: unknown, commands: unkno
       const rotation =
         length === 0 ? 0 : direction(local[0] * dx + local[2] * dy, local[1] * dx + local[3] * dy)
       doc.bones.push({ boneId: e.boneId, name: e.name, parentBoneId: e.parentBoneId, x, y, rotation, length })
-    } else if (e.op === 'place-bone') {
-      const bone=doc.bones.find(b=>b.boneId===e.boneId)
-      if (!bone) throw new Error('未知骨骼 '+e.boneId)
-      const parent=bone.parentBoneId ? model.skeleton.rest.get(bone.parentBoneId)!.matrix : identity
-      const local=inverse(parent), [x,y]=transform(local,...e.start), [tx,ty]=transform(local,...e.end)
-      Object.assign(bone,{x,y,length:Math.hypot(tx-x,ty-y),rotation:direction(tx-x,ty-y)})
+    } else if (e.op === 'place-bone' || e.op === 'repivot-bone') {
+      const bone = doc.bones.find((b) => b.boneId === e.boneId)
+      if (!bone) throw new Error('未知骨骼 ' + e.boneId)
+      const prevPose = model.skeleton.rest.get(e.boneId)!
+      const nextStart: Point = e.op === 'place-bone' ? e.start : e.pivot
+      let nextEnd: Point
+      if (e.op === 'place-bone') {
+        nextEnd = e.end
+      } else if (e.keepEnd === false) {
+        nextEnd = [
+          e.pivot[0] + (prevPose.end[0] - prevPose.start[0]),
+          e.pivot[1] + (prevPose.end[1] - prevPose.start[1]),
+        ]
+      } else {
+        const dist = Math.hypot(prevPose.end[0] - e.pivot[0], prevPose.end[1] - e.pivot[1])
+        nextEnd =
+          dist > 1e-6
+            ? prevPose.end
+            : [
+                e.pivot[0] + (prevPose.end[0] - prevPose.start[0]),
+                e.pivot[1] + (prevPose.end[1] - prevPose.start[1]),
+              ]
+      }
+      const parent = bone.parentBoneId ? model.skeleton.rest.get(bone.parentBoneId)!.matrix : identity
+      const local = inverse(parent)
+      const [x, y] = transform(local, ...nextStart)
+      const [tx, ty] = transform(local, ...nextEnd)
+      Object.assign(bone, { x, y, length: Math.hypot(tx - x, ty - y), rotation: direction(tx - x, ty - y) })
+      if (e.op === 'repivot-bone') {
+        // Keep direct child bones at their exact original rest world transforms.
+        const movedSkeleton = prepareSkeleton(doc.bones, neutral(model.caps).values)
+        const nextParentWorld = movedSkeleton.rest.get(e.boneId)!.matrix
+        for (const child of doc.bones) {
+          if (child.parentBoneId !== e.boneId) continue
+          const prevChildWorld = model.skeleton.rest.get(child.boneId)!.matrix
+          const childLocal = compose(inverse(nextParentWorld), prevChildWorld)
+          Object.assign(child, {
+            x: childLocal[4],
+            y: childLocal[5],
+            rotation: direction(childLocal[0], childLocal[1]),
+          })
+        }
+      }
       // Recalibrate attachments against their original rest pixels, including children of the edited bone.
-      const nextSkeleton=prepareSkeleton(doc.bones,neutral(model.caps).values)
+      const nextSkeleton = prepareSkeleton(doc.bones, neutral(model.caps).values)
       for (const binding of doc.bindings) {
-        const root=binding.boneId ?? binding.boneChain?.[0]
+        const root = binding.boneId ?? binding.boneChain?.[0]
         if (!root) continue
-        const layer=manifest.layers.find(l=>l.layerId===binding.layerId)!
-        binding.restOffset=compose(inverse(nextSkeleton.rest.get(root)!.matrix),model.restLayerMatrix(binding.layerId))
-        binding.bindOrigin=[layer.rect[0],layer.rect[1]]
+        const layer = manifest.layers.find((l) => l.layerId === binding.layerId)!
+        binding.restOffset = compose(inverse(nextSkeleton.rest.get(root)!.matrix), model.restLayerMatrix(binding.layerId))
+        binding.bindOrigin = [layer.rect[0], layer.rect[1]]
       }
     } else if (e.op === 'reparent' || e.op === 'edit-bone' || e.op === 'remove-bone') {
       const bone = doc.bones.find((b) => b.boneId === e.boneId)
@@ -135,6 +201,9 @@ export function editRig(manifest: SliceManifest, input: unknown, commands: unkno
     } else if (e.op === 'set-morphs') {
       if (e.morphs.length) doc.morphs = e.morphs
       else delete doc.morphs
+    } else if (e.op === 'set-head-calibration') {
+      if (e.headCalibration) doc.headCalibration = e.headCalibration
+      else delete doc.headCalibration
     } else if (e.op === 'set-cast-shadows') {
       if (e.castShadows.length) doc.castShadows = e.castShadows
       else delete doc.castShadows

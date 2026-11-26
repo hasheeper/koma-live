@@ -1,8 +1,7 @@
-# Koma 轻度 2.5D 头部离线烘焙（Morph 底座 + THA3 烘焙器）需求文档与实施计划
+# Koma 轻度 2.5D 头部离线烘焙（Morph 底座 + THA3 烘焙器）需求文档与实施计划（已归档）
 
-> **文档性质**：独立可执行的需求规格、产品边界与工程实施计划（供研发 / Agent 直接接手实施）。  
-> **关联文档**：[设计哲学](design-philosophy.md) · [核心规格](rig-spec.md) · [演出契约](performance-contract.md) · [离线装配](offline-authoring.md) · [动帧视觉验收](live-inspection.md)  
-> Phase 1–3 已完成实验验证。头部姿态通过 THA3 离线烘焙为九姿态 Morph。[烘焙配置与命令](../tools/head-bake/README.md)
+> **归档说明**：本文记录 THA3 离线 Python 烘焙器的早期实验方案，现已退役并移除 `tools/head-bake/`；其 **Morph 底座** 已保留于内核，头部九姿态现由零外部依赖的纯 TS 解析式 `npm run rig -- auto-head`（[head-morph.ts](../../packages/rig-core/src/head-morph.ts)）替代。  
+> **关联文档**：[设计哲学](../design-philosophy.md) · [核心规格](../rig-spec.md) · [演出契约](../performance-contract.md) · [离线装配](../offline-authoring.md) · [动帧视觉验收](../live-inspection.md)
 
 ---
 
@@ -203,7 +202,7 @@ THA3 是在标准二次元半身像分布上训练的（头部大致居中偏上
 
 #### (5) 角色级烘焙配置（`head-bake.json` 示例）
 
-以下是精简配置。实机样板另外包含眼口局部配准区、服装上下文及跟随发冠根部的呆毛。[配置说明](../tools/head-bake/README.md)
+以下是历史 THA3 实验方案的精简配置示例（现行零依赖 `head-rig.json` 请见 [离线装配](../offline-authoring.md)）。
 
 ```json
 {

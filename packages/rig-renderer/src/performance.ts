@@ -4,6 +4,7 @@ import {
   computeLayerPixelScale,
   computeViewportLayout,
   createErrorGate,
+  createPhysicsToolkit,
   mapClientToLogicalPointer,
   performanceMetaSchema,
   resolveViewport,
@@ -11,6 +12,7 @@ import {
   type LogicalPointer,
   type PerformanceErrorPolicy,
   type PerformanceMeta,
+  type PhysicsToolkit,
   type Pose,
   type ViewportLayout,
   type WorkViewport,
@@ -34,6 +36,7 @@ export interface PerformanceLayerSlot {
 export interface PerformanceContext {
   puppet: LiveRigPlayer
   size: { width: number; height: number }
+  physics: PhysicsToolkit
   back?: PerformanceLayerSlot
   front?: PerformanceLayerSlot
 }
@@ -358,6 +361,7 @@ export async function mountPerformance(
     instance = await factory({
       puppet,
       size: { ...size },
+      physics: createPhysicsToolkit(),
       ...(backSlot ? { back: backSlot } : {}),
       ...(frontSlot ? { front: frontSlot } : {}),
     })

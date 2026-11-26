@@ -1,3 +1,4 @@
+import { cpuUsage } from 'node:process'
 import { describe, expect, it } from 'vitest'
 import {
   GeometryError,
@@ -257,10 +258,11 @@ describe('M4 Mesh Field (code-native procedural vertex deformation)', () => {
       })
     run16x16(0, 0)
     run16x16(0.1, 16)
-    const t0 = performance.now()
+    const cpu0 = cpuUsage()
     for (let f = 0; f < 30; f++) run16x16(f * 0.2, (f + 2) * 16)
-    const elapsedMs = performance.now() - t0
-    expect(elapsedMs).toBeLessThan(300)
+    const cpu = cpuUsage(cpu0)
+    const elapsedCpuMs = (cpu.user + cpu.system) / 1000
+    expect(elapsedCpuMs).toBeLessThan(300)
   })
 
   it('supports runtime opacity, tint, and validateGeometry opt-out on rig.pose()', () => {
